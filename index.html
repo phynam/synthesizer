@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Synth</title>
+</head>
+<body>
+    <section class="sequencer">
+        <div class="sequencer__step" role="button"></div>
+        <div class="sequencer__step" role="button"></div>
+        <div class="sequencer__step" role="button"></div>
+        <div class="sequencer__step" role="button"></div>
+        <div class="sequencer__step" role="button"></div>
+        <div class="sequencer__step" role="button"></div>
+        <div class="sequencer__step" role="button"></div>
+        <div class="sequencer__step" role="button"></div>
+        <div class="sequencer__step" role="button"></div>
+    </section>
+
+    <style>
+        .sequencer {
+            display: flex;
+        }
+        .sequencer__step {
+            width: 50px;
+            height: 50px;
+            background: #eee;
+            border:1px solid #ddd;
+            margin: 5px;
+        }
+    </style>
+    <script src="helpers.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
