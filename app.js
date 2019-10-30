@@ -1,10 +1,6 @@
-(function(_, SequencerView) {
+(function(_, PianoRollView) {
     
     // View takes an object of methods and properties
-    window.view = new SequencerView('#sequencer');
+    window.view = new PianoRollView('[data-piano-roll]');
 
-    window.view.bus.subscribe('Test', p => {
-        console.log(p);
-    });
-
-})(_, SequencerView);
+})(_, PianoRollView);

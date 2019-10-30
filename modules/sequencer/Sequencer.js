@@ -1,4 +1,4 @@
-class Sequencer 
+class Sequencer extends Module
 {
     
 }

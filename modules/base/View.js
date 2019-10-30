@@ -43,7 +43,7 @@ class View extends Module
      * @param {function} handler 
      */
     _bindHandler(el, eventName, handler) {
-        _(el).on(eventName, handler);
+        _(el).on(eventName, handler, this);
     }
 
     /**

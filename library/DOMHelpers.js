@@ -16,10 +16,11 @@ class DOMHelpers
     /**
      * Assign given handler to named event for each node.
      */
-    on = (eventName, handler) => {
+    on = (eventName, handler, context) => {
+
         this._eachNode(node => {
             let cb = e => {
-                handler(e, node);
+                handler.bind(context || this)(e, node);
             }
             node.addEventListener(eventName, cb);
         });
