@@ -8,3 +8,4 @@ Sequencer
 - [] I can preview the output of a note when I place it
 - [] I can modify the number of bars a pattern cycles for (4 to 16)
 - [] I can place a note from c1(0) to 127
+- [] I can change the tempo of a sequence
