@@ -1,3 +1,7 @@
+/**
+ * Responsible only for handling dom events, sanitizing DOM data and user input,
+ * and bubbling up as events to be caught elsewhere.
+ */
 class View extends Module
 {
     selector;
