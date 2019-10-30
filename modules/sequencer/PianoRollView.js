@@ -1,5 +1,8 @@
 class PianoRollView extends View
 {
+    dragThresholdPx = 5;
+    currentNote;
+
     constructor(selector)
     {
         super(selector);
@@ -7,12 +10,23 @@ class PianoRollView extends View
     }
 
     handlers = {
-        '.piano-roll__note:click': this.onStepClick
+        '.piano-roll__note:mousedown': this.onNoteMousedown,
+        '.piano-roll__note:mouseup': this.onNoteMouseup
     }
 
-    onStepClick(e, el) {
-        console.log(this);
-        this.bus.publish('note:select', []);
+    onNoteMousedown(e, el) {
+        if(e.offsetX < this.dragThresholdPx || e.offsetX > el.offsetWidth - this.dragThresholdPx) {
+            document.addEventListener('mousemove', this.resizeNote, false);
+        }
+    }
+
+    onNoteMouseup(e, el) {
+        console.log('up');
+        document.removeEventListener('mousemove', this.resizeNote, false);
+    }
+
+    resizeNote = (e) => {
+        console.log(e.offsetX);
     }
 
     render = () => {

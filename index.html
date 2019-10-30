@@ -14,10 +14,31 @@
 
     <style>
         .piano-roll__note {
+            position: relative;
             width: 40px;
             height: 15px;
             background: slategrey;
             border-radius: 3px;
+            cursor: move;
+        }
+
+        .piano-roll__note:before, .piano-roll__note:after {
+            content: '';
+            display: block;
+            width: 5px;
+            height: inherit;
+            position: absolute;
+            top: 0;
+        }
+
+        .piano-roll__note:after {
+            right: 0;
+            cursor: e-resize;
+        }
+
+        .piano-roll__note:before {
+            left: 0;
+            cursor: w-resize;
         }
     </style>
 
