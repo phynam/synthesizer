@@ -7,7 +7,7 @@
     <title>Synth</title>
 </head>
 <body>
-    <section class="sequencer">
+    <section id="sequencer" class="sequencer">
         <div class="sequencer__step" role="button"></div>
         <div class="sequencer__step" role="button"></div>
         <div class="sequencer__step" role="button"></div>
@@ -29,9 +29,13 @@
             background: #eee;
             border:1px solid #ddd;
             margin: 5px;
+            cursor: pointer;
         }
     </style>
-    <script src="helpers.js"></script>
+    <script src="modules/View.js"></script>
+    <script src="modules/sequencer/SequencerView.js"></script>
+    <script src="modules/sequencer/Sequencer.js"></script>
+    <script src="library/DOMhelpers.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

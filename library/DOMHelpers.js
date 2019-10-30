@@ -1,13 +1,12 @@
-/**
- * Helpers
- */
 class DOMHelpers
 {
     nodes;
+    query;
 
     constructor(x) {
         if(typeof x === 'string') {
             this.nodes = document.querySelectorAll(x);
+            this.query = x;
         }
         if(typeof x === 'object' && x.nodeName) {
             this.nodes = [x];
@@ -20,7 +19,7 @@ class DOMHelpers
     on = (eventName, handler) => {
         this._eachNode(node => {
             let cb = e => {
-                handler(new DOMHelpers(node), e);
+                handler(e, node);
             }
             node.addEventListener(eventName, cb);
         });
@@ -28,6 +27,13 @@ class DOMHelpers
         return this;
     }
 
+    first = () => {
+        return this.nodes[0];
+    }
+
+    /**
+     * Iterate over all nodes in collection.
+     */
     _eachNode = cb => {
         for(let i = 0; i < this.nodes.length; i++) {
             cb(this.nodes[i]);

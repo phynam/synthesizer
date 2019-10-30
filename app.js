@@ -1,18 +1,6 @@
-(function(_) {
-
-    let handleSequencerClick = (n, e) => {
-        console.log(n);
-    }
-
-    const SELECTORS = {
-        '.sequencer__step': handleSequencerClick
-    };
-
-    Object.keys(SELECTORS).forEach(key => {
-        _(key).on('click', SELECTORS[key]);
-    });
-
+(function(_, SequencerView) {
+    
     // View takes an object of methods and properties
+    window.view = new SequencerView('#sequencer');
 
-
-})(_);
+})(_, SequencerView);
