@@ -27,6 +27,7 @@ class PianoRollView extends View
      * Handler methods
      */
     onNoteMousedown(e, el) {
+        console.log('test');
         if(e.offsetX < this.dragThresholdPx || e.offsetX > el.offsetWidth - this.dragThresholdPx) {
             document.addEventListener('mousemove', this.onNoteResize, false);
         }
@@ -37,7 +38,8 @@ class PianoRollView extends View
     }
 
     onNoteResize(e) {
-
+        console.log(e);
+        // Change start position
     }
 
     /**
@@ -46,11 +48,7 @@ class PianoRollView extends View
     renderNotes = () => {
         let template = '';
         for(let i = 0; i < this.notes.length; i++) {
-
             let note = this.notes[i];
-
-            // Convert start point to position
-
             template += this.noteTemplate(
                 this.asPercentage(note[1] - note[0]), 
                 this.asPercentage(note[0] - 1)

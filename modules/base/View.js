@@ -38,21 +38,12 @@ class View extends Module
     /**
      * Bind a given eventname to a handler method.
      * 
-     * @param {DOMElement} el
+     * @param {string} el
      * @param {string} eventName 
      * @param {function} handler 
      */
     _bindHandler(el, eventName, handler) {
-        _(el).on(eventName, handler, this);
-    }
-
-    /**
-     * Scope a given selector to the parent selector.
-     * 
-     * @param {string} selector 
-     */
-    _scopeSelector(selector) {
-        return `${this.selector} ${selector}`;
+        _(this.el).on(eventName, el, handler, this);
     }
 }
 

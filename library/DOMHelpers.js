@@ -16,10 +16,22 @@ class DOMHelpers
     /**
      * Assign given handler to named event for each node.
      */
-    on = (eventName, handler, context) => {
+    on = (eventName, ...args) => {
+
+        let handler = args[0], context = args[1], delegateSelector;
+
+        if(typeof args[0] === 'string' && typeof args[1] === 'function') {
+            delegateSelector = args[0];
+            handler = args[1];
+            context = args[2];
+        }
 
         this._eachNode(node => {
             let cb = e => {
+                if(! e.target.matches(delegateSelector)) {
+                    return;
+                }
+
                 handler.bind(context || this)(e, node);
             }
             node.addEventListener(eventName, cb);
