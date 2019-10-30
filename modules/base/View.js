@@ -1,4 +1,4 @@
-class View 
+class View extends Module
 {
     selector;
     _el;
@@ -6,6 +6,8 @@ class View
     handlers = {};
 
     constructor(selector) {
+
+        super();
 
         if(!selector) {
             console.error('[View] No selector passed to view instance.');
