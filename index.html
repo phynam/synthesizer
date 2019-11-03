@@ -9,7 +9,6 @@
 <body>
 
     <div class="piano-roll" data-piano-roll>
-        <div class="piano-roll__note" role="button"></div>
     </div>
 
     <style>
@@ -28,7 +27,7 @@
         .piano-roll__note:before, .piano-roll__note:after {
             content: '';
             display: block;
-            width: 5px;
+            width: 6px;
             height: inherit;
             position: absolute;
             top: 0;
@@ -49,7 +48,7 @@
     <script src="modules/base/Module.js"></script>
     <script src="modules/base/View.js"></script>
 
-    <script src="modules/sequencer/PianoRollView.js"></script>
+    <script src="modules/sequencer/PianoRollNotes.view.js"></script>
     <script src="modules/sequencer/Sequencer.js"></script>
     <script src="library/DOMhelpers.js"></script>
     <script src="app.js"></script>

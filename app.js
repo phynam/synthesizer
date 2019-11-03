@@ -1,6 +1,6 @@
-(function(_, PianoRollView) {
+(function(_, PianoRollNotes) {
     
     // View takes an object of methods and properties
-    window.view = new PianoRollView('[data-piano-roll]');
+    window.view = new PianoRollNotes('[data-piano-roll]');
 
-})(_, PianoRollView);
+})(_, PianoRollNotes);

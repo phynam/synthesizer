@@ -32,7 +32,7 @@ class DOMHelpers
                     return;
                 }
 
-                handler.bind(context || this)(e, node);
+                handler.bind(context || this)(e, e.target);
             }
             node.addEventListener(eventName, cb);
         });
@@ -44,6 +44,17 @@ class DOMHelpers
         return this.nodes[0];
     }
 
+    offset = (el) => {
+        let rect = this.first().getBoundingClientRect(),
+            scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
+            scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+        return { 
+            top: rect.top + scrollTop, 
+            left: rect.left + scrollLeft 
+        }
+    }
+    
     /**
      * Iterate over all nodes in collection.
      */

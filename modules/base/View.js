@@ -26,6 +26,17 @@ class View extends Module
     }
 
     /**
+     * Create a DOM element from a string of HTML
+     * 
+     * @param {string} htmlString 
+     */
+    createElement(htmlString) {
+        let div = document.createElement('div');
+        div.innerHTML = htmlString.trim();
+        return div.firstChild; 
+    }
+
+    /**
      * Bind each handler element in the handlers hash to a given callback, scoped to current element.
      */
     _bindHandlers() {
