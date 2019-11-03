@@ -8,12 +8,13 @@
 </head>
 <body>
 
-    <div class="piano-roll" data-piano-roll>
+    <div class="piano-roll__notes" data-piano-roll-notes>
     </div>
 
     <style>
-        .piano-roll {
+        .piano-roll__notes {
             position: relative;
+            background: #eee;
         }
         .piano-roll__note {
             position: absolute;
@@ -27,7 +28,7 @@
         .piano-roll__note:before, .piano-roll__note:after {
             content: '';
             display: block;
-            width: 6px;
+            width: 8px;
             height: inherit;
             position: absolute;
             top: 0;
