@@ -41,7 +41,7 @@ class View extends Module
      */
     _bindHandlers() {
         Object.keys(this.handlers).forEach(key => {
-            let [selector, eventName] = key.split(':');
+            let [eventName, selector] = key.split(':');
             this._bindHandler(selector, eventName, this.handlers[key])
         });
     }
@@ -49,12 +49,12 @@ class View extends Module
     /**
      * Bind a given eventname to a handler method.
      * 
-     * @param {string} el
+     * @param {string} selector
      * @param {string} eventName 
      * @param {function} handler 
      */
-    _bindHandler(el, eventName, handler) {
-        _(this.el).on(eventName, el, handler, this);
+    _bindHandler(selector, eventName, handler) {
+        _(this.el).on(eventName, selector, handler, this);
     }
 }
 

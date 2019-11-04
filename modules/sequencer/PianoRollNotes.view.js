@@ -8,19 +8,20 @@ class PianoRollNotes extends View
         super(selector);
         this._bindHandlers();
 
+        document.addEventListener('mouseup', this.removeMoveHandlers.bind(this));
+
         // TODO: MOVE UP TO PARENT
         this.notes = [
-            [2,2.25,61,127], [4,4.5,63,127], [3,3.75,65,127], [2,2.75,67,127]
+            [2,2.25,128,127], [4,4.5,127,127], [3,3.75,126,127], [2,2.75,125,127]
         ];
+
         this.gridResolutionX = 16;
         this.gridResolutionY = 128;
+        this.rowHeightPx = 17;
         this.noteHeightPx = 15;
-        
 
         // TODO: Validate on changes to data, not to dom. if validation success - rerender
-
-
-        this.el.style.height = `${this.gridResolutionY * this.noteHeightPx}px`;
+        this.el.style.height = `${(this.gridResolutionY + 1) * this.rowHeightPx}px`;
 
         this.notes.forEach(n => {
             this.create(n);
@@ -30,9 +31,8 @@ class PianoRollNotes extends View
     }
 
     handlers = {
-        '.piano-roll__note:mousedown': this.onNoteMousedown,
-        '.piano-roll__note:mouseup': this.onNoteMouseup,
-        '.piano-roll__notes:mouseup': this.onMouseUp
+        'mousedown:.piano-roll__note': this.onNoteMousedown,
+        'mouseup:.piano-roll__note': this.onNoteMouseup
     }
 
     /**
@@ -42,6 +42,7 @@ class PianoRollNotes extends View
 
         el.originalWidth = el.offsetWidth;
         el.originalOffsetX = _(el).offset().left;
+        el.originalOffsetY = _(el).offset().top;
         el.cursorStartX = e.x;
         el.cursorStartY = e.y;
 
@@ -69,9 +70,6 @@ class PianoRollNotes extends View
 
     onNoteMouseup(e) {
 
-        document.removeEventListener('mousemove', this.onNoteResize, false);
-        document.removeEventListener('mousemove', this.onNoteMove, false);
-
         // Store value
     }
 
@@ -90,13 +88,14 @@ class PianoRollNotes extends View
 
     onNoteMove(e) {
 
-        let offset = this._el.offset().left;
-        let cursorOffset = e.target.cursorStartX - e.target.originalOffsetX;
+        let offsetX = this._el.offset().left,
+            offsetY = this._el.offset().top,
+            cursorOffsetX = this.currentEl.cursorStartX - this.currentEl.originalOffsetX;
 
-        this.setXPosition(this.currentEl, (e.x - offset) - cursorOffset);
+        this.setXPosition(this.currentEl, e.x - offsetX - cursorOffsetX);
     }
 
-    onMouseUp(e) {
+    removeMoveHandlers() {
         document.removeEventListener('mousemove', this.onNoteResize, false);
         document.removeEventListener('mousemove', this.onNoteMove, false);
     }
@@ -107,19 +106,20 @@ class PianoRollNotes extends View
     create(note) {
         let el = document.createElement('div');
         el.classList.add('piano-roll__note');
+
         this.setXPosition(el, this.beatsToPx(note[0]));
-        this.setYPosition(el, note[2] * this.noteHeightPx);
+        this.setYPosition(el, note[2] * this.rowHeightPx);
         this.setWidth(el, this.beatsToPx(note[1] - note[0]));
+
         this.el.appendChild(el);
     }
 
     setXPosition(el, xOffset) {
         el.style.left = `${this.pxToPercent(xOffset)}%` || el.style.left;
-        return el;
     }
 
     setYPosition(el, yOffset) {
-        el.style.top = `${yOffset}px`;
+        el.style.bottom = `${yOffset}px`;
     }
 
     setWidth(el, width) {
@@ -140,7 +140,6 @@ class PianoRollNotes extends View
     pxToPercent(px) {
         return px / this.el.offsetWidth * 100;
     }
-
 }
 
 window.PianoRollNotes = PianoRollNotes;
