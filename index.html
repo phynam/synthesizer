@@ -7,14 +7,19 @@
     <title>Synth</title>
 </head>
 <body>
-
-    <div class="piano-roll__notes" data-piano-roll-notes>
+    <div class="piano-roll">
+        <div class="piano-roll__notes" data-piano-roll-notes>
+        </div>
     </div>
 
     <style>
+        .piano-roll {
+            border: 10px solid #ddd;
+        }
         .piano-roll__notes {
+            overflow: hidden;
             position: relative;
-            background: url('octave.svg');
+            background: url('octave.svg') 0 100%;
         }
         .piano-roll__note {
             position: absolute;
