@@ -54,6 +54,10 @@ class DOMHelpers
 			left: rect.left + win.pageXOffset
 		};
     }
+
+    find = (cb) => {
+        return Array.from(this.nodes).find(cb);
+    }
     
     /**
      * Iterate over all nodes in collection.
