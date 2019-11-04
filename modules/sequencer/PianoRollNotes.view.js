@@ -17,7 +17,7 @@ class PianoRollNotes extends View
 
         this.gridResolutionX = 16;
         this.gridResolutionY = 128;
-        this.rowHeightPx = 17;
+        this.rowHeightPx = 16;
         this.noteHeightPx = 15;
 
         // TODO: Validate on changes to data, not to dom. if validation success - rerender
@@ -93,7 +93,7 @@ class PianoRollNotes extends View
             cursorOffsetX = this.currentEl.cursorStartX - this.currentEl.originalOffsetX,
             rowsMoved = Math.floor((this.currentEl.originalOffsetY - e.y) / this.rowHeightPx) + 1;
             
-        this.setYPosition(this.currentEl, -(rowsMoved * this.rowHeightPx) + this.currentEl.originalOffsetY + offsetY + 1);
+        this.setYPosition(this.currentEl, -(rowsMoved * this.rowHeightPx) + this.currentEl.originalOffsetY + offsetY);
         this.setXPosition(this.currentEl, e.x - offsetX - cursorOffsetX);
     }
 
