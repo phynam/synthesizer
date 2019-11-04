@@ -25,6 +25,15 @@ class PianoRollNotes extends View
             [2,2.25,127,127], [4,4.5,126,127], [3,3.75,125,127], [2,4,124,127]
         ];
 
+        notes = notes.map(n => {
+            return new Model({
+                start: n[0],
+                end: n[1],
+                note: n[2],
+                velocity: n[3]
+            });
+        });
+
         this.render({
             notes: notes,
             nBeatsInSequence: 16,
@@ -150,9 +159,9 @@ class PianoRollNotes extends View
 
         notes.forEach(newNote => {
 
-            // Find DOM note with matching start time and note ID
+            // Find DOM note with matching id
             let result = _notes.find(domNote => {
-                return domNote.noteData[0] === newNote[0] && domNote.noteData[2] === newNote[2]
+                return domNote.noteID === newNote.id;
             });
 
             // Create if it doesn't already exist and render to the DOM
@@ -169,15 +178,15 @@ class PianoRollNotes extends View
     _createNoteElement(note) {
         let el = document.createElement('div');
         el.classList.add('piano-roll__note');
-        el.noteData = note;
+        el.noteID = note.id;
 
         return el;
     }
 
     _setNotePosition(el, note) {
-        this._setXposition(el, this.beatsToPx(note[0]));
-        this._setYposition(el, (this.settings.nNotes - note[2]) * this.rowHeightPx);
-        this._setWidth(el, this.beatsToPx(note[1] - note[0]));
+        this._setXposition(el, this.beatsToPx(note.start));
+        this._setYposition(el, (this.settings.nNotes - note.note) * this.rowHeightPx);
+        this._setWidth(el, this.beatsToPx(note.end - note.start));
     }
 
     _setXposition(el, xOffset) {
