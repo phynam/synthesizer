@@ -155,17 +155,13 @@ class PianoRollNotes extends View
 
     _renderNotes(notes) {
 
-        let _notes = _('.piano-roll__note');
-
         notes.forEach(newNote => {
 
             // Find DOM note with matching id
-            let result = _notes.find(domNote => {
-                return domNote.noteID === newNote.id;
-            });
+            let result = document.getElementById(newNote.id);
 
             // Create if it doesn't already exist and render to the DOM
-            if(!result) {
+            if(! result) {
                 result = this._createNoteElement(newNote);
                 this.el.appendChild(result);
             }
@@ -178,6 +174,7 @@ class PianoRollNotes extends View
     _createNoteElement(note) {
         let el = document.createElement('div');
         el.classList.add('piano-roll__note');
+        el.id = note.id;
         el.noteID = note.id;
 
         return el;
