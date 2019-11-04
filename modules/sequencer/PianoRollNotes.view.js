@@ -90,8 +90,10 @@ class PianoRollNotes extends View
 
         let offsetX = this._el.offset().left,
             offsetY = this._el.offset().top,
-            cursorOffsetX = this.currentEl.cursorStartX - this.currentEl.originalOffsetX;
-
+            cursorOffsetX = this.currentEl.cursorStartX - this.currentEl.originalOffsetX,
+            rowsMoved = Math.floor((this.currentEl.originalOffsetY - e.y) / this.rowHeightPx) + 1;
+            
+        this.setYPosition(this.currentEl, -(rowsMoved * this.rowHeightPx) + this.currentEl.originalOffsetY + offsetY + 1);
         this.setXPosition(this.currentEl, e.x - offsetX - cursorOffsetX);
     }
 
@@ -108,7 +110,7 @@ class PianoRollNotes extends View
         el.classList.add('piano-roll__note');
 
         this.setXPosition(el, this.beatsToPx(note[0]));
-        this.setYPosition(el, note[2] * this.rowHeightPx);
+        this.setYPosition(el, (this.gridResolutionY - note[2]) * this.rowHeightPx);
         this.setWidth(el, this.beatsToPx(note[1] - note[0]));
 
         this.el.appendChild(el);
@@ -119,7 +121,7 @@ class PianoRollNotes extends View
     }
 
     setYPosition(el, yOffset) {
-        el.style.bottom = `${yOffset}px`;
+        el.style.top = `${yOffset}px`;
     }
 
     setWidth(el, width) {
