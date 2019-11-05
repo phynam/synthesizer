@@ -2,6 +2,7 @@ class Model extends Module {
 
     id;
     properties = {};
+    oldProperties = {};
 
     constructor(properties)
     {
@@ -31,5 +32,14 @@ class Model extends Module {
         }
 
         return p;
+    }
+
+    cache = () => {
+        this.oldProperties = this.toArray();
+        return this;
+    }
+
+    last = (key) => {
+        return this.oldProperties[key];
     }
 }

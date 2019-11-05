@@ -7,7 +7,7 @@ class View extends Module
     selector;
     _el;
     el;
-    handlers = {};
+    interfaceHandlers = {};
 
     constructor(selector) {
 
