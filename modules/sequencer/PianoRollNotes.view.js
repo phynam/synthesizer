@@ -131,7 +131,7 @@ class PianoRollNotes extends View
     onNoteMove(e) {
         let dragDistanceX = e.pageX - this.lastCursorPositionX,
             dragDistanceY = e.pageY - this.lastCursorPositionY,
-            noteOffset = -Math.floor(dragDistanceY / this.rowHeightPx);
+            noteOffset = -Math.floor((dragDistanceY + this.rowHeightPx / 2) / this.rowHeightPx);
 
         this.currentSelection.each(note => {
             note.start = this._pxToBeats(dragDistanceX) + note.last('start');
