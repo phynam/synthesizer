@@ -10,7 +10,7 @@ class Module
     _bindBusHandlers()
     {
         Object.keys(this.busHandlers).forEach(eventName => {
-            this.bus.subscribe(eventName, this.busHandlers[eventName]);
+            this.bus.subscribe(eventName, this.busHandlers[eventName].bind(this));
         });
     }
 }

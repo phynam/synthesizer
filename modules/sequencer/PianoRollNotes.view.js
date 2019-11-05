@@ -61,14 +61,27 @@ class PianoRollNotes extends View
     }
 
     busHandlers = {
-        'notes:move': function(payload) {
-            console.log(payload);
-        }
+        'notes:move': this.onNotesMove
     }
 
     interfaceHandlers = {
         'mousedown:.piano-roll__note': this.onNoteMousedown,
         'click:.piano-roll__notes': this.onGridClick
+    }
+
+    /**
+     * Bus Handlers
+     */
+    onNotesMove(payload) {
+        payload.each(item => {
+            let note = window.notes.find(item.id);
+
+            note.properties = item.properties;
+        });
+
+        this.render({
+            notes: window.notes.all()
+        });
     }
 
     /**
@@ -149,7 +162,11 @@ class PianoRollNotes extends View
     onGlobalMouseup(e) {
         if(this.currentAction == 'notes:resize' || this.currentAction == 'notes:move') {
 
-            this.bus.publish(this.currentAction, this.currentSelection.all());
+            this.currentSelection.each(selection => {
+                selection.cache();
+            });
+
+            this.bus.publish(this.currentAction, this.currentSelection);
 
             document.removeEventListener('mousemove', this.onNoteResize, false);
             document.removeEventListener('mousemove', this.onNoteMove, false);
