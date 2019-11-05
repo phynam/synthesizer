@@ -15,7 +15,7 @@ class PianoRollNotes extends View
     constructor(selector)
     {
         super(selector);
-        this._bindHandlers();
+        this._bindInterfaceHandlers();
 
         this.currentSelection = new CurrentSelectionCollection();
 
@@ -51,7 +51,7 @@ class PianoRollNotes extends View
         });
     }
 
-    handlers = {
+    interfaceHandlers = {
         'mousedown:.piano-roll__note': this.onNoteMousedown,
         'mouseup:.piano-roll__note': this.onNoteMouseup,
         'click:.piano-roll__notes': this.onGridClick
@@ -122,7 +122,7 @@ class PianoRollNotes extends View
         //     attenuation = e.x - this.currentEl.cursorStartX;
 
         // if(this.currentEl.changeOffset) {
-        //     this._setXposition(this.currentEl, e.x - offset);
+        //     this._renderXPosition(this.currentEl, e.x - offset);
         //     attenuation = -attenuation;
         // }
 
@@ -191,19 +191,15 @@ class PianoRollNotes extends View
     }
 
     _renderNotePosition(el, note) {
-        this._setXposition(el, this._beatsToPercent(note.start));
-        this._setYposition(el, (this.settings.nNotes - note.note) * this.rowHeightPx);
+        this._renderXPosition(el, this._beatsToPercent(note.start));
+        this._renderYPosition(el, (this.settings.nNotes - note.note) * this.rowHeightPx);
     }
 
-    _setXposition(el, position) {
+    _renderXPosition(el, position) {
         el.style.left = `${position}%` || el.style.left;
     }
 
-    _offsetXposition(el, xOffset, base) {
-        this._setXposition(el, (base || parseFloat(el.style.left)) + xOffset);
-    }
-
-    _setYposition(el, position) {
+    _renderYPosition(el, position) {
         el.style.top = `${position}px`;
     }
 

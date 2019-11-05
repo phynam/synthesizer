@@ -39,10 +39,10 @@ class View extends Module
     /**
      * Bind each handler element in the handlers hash to a given callback, scoped to current element.
      */
-    _bindHandlers() {
-        Object.keys(this.handlers).forEach(key => {
+    _bindInterfaceHandlers() {
+        Object.keys(this.interfaceHandlers).forEach(key => {
             let [eventName, selector] = key.split(':');
-            this._bindHandler(selector, eventName, this.handlers[key])
+            this._bindInterfaceHandler(selector, eventName, this.interfaceHandlers[key])
         });
     }
 
@@ -53,7 +53,7 @@ class View extends Module
      * @param {string} eventName 
      * @param {function} handler 
      */
-    _bindHandler(selector, eventName, handler) {
+    _bindInterfaceHandler(selector, eventName, handler) {
         _(this.el).on(eventName, selector, handler, this);
     }
 }
