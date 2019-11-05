@@ -57,5 +57,3 @@ class View extends Module
         _(this.el).on(eventName, selector, handler, this);
     }
 }
-
-window.View = View;

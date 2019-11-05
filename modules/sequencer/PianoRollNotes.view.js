@@ -8,7 +8,7 @@ window.notes = [
 ];
 
 window.notes = notes.map(n => {
-    return new Model({
+    return new NoteModel({
         id: Date.now() + ~~((Math.random() * 1000) + 1),
         start: n[0],
         end: n[1],

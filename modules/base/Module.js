@@ -14,5 +14,3 @@ class Module
         });
     }
 }
-
-window.Module = Module;

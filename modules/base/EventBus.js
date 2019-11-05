@@ -24,5 +24,3 @@ class EventBus
         this.events[eventName] = callback;
     }
 }
-
-window.EventBus = EventBus;
