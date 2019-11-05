@@ -1,3 +1,29 @@
+/**
+ * Controller logic
+ * 
+ * TODO: DELETE
+ */
+window.notes = [
+    [2,2.25,127,127], [4,4.5,126,127], [3,3.75,125,127], [2,4,124,127]
+];
+
+window.notes = notes.map(n => {
+    return new Model({
+        id: Date.now() + ~~((Math.random() * 1000) + 1),
+        start: n[0],
+        end: n[1],
+        note: n[2],
+        velocity: n[3]
+    });
+});
+
+window.notes = new Collection(window.notes);
+
+
+//////////////////
+
+
+
 class PianoRollNotes extends View
 {
     dragThresholdPx = 8;
@@ -20,32 +46,12 @@ class PianoRollNotes extends View
         this._bindInterfaceHandlers();
         this._bindBusHandlers();
 
-        this.currentSelection = new CurrentSelectionCollection();
+        this.currentSelection = new Collection();
 
         /**
          * Remove stray resize handlers.
          */
         document.addEventListener('mouseup', this.onGlobalMouseup.bind(this));
-
-        /**
-         * Controller logic
-         * 
-         * TODO: MOVE UP TO GLOBAL SINGLETON
-         */
-        window.notes = [
-            [2,2.25,127,127], [4,4.5,126,127], [3,3.75,125,127], [2,4,124,127]
-        ];
-
-        window.notes = notes.map(n => {
-            return new Model({
-                start: n[0],
-                end: n[1],
-                note: n[2],
-                velocity: n[3]
-            });
-        });
-
-        window.notes = new Collection(window.notes);
 
         this.render({
             notes: window.notes.all(),
@@ -57,8 +63,6 @@ class PianoRollNotes extends View
     busHandlers = {
         'notes:move': function(payload) {
             console.log(payload);
-            // Attempt to validate note position
-            // If unsuccessful, reRender the original
         }
     }
 
@@ -72,12 +76,10 @@ class PianoRollNotes extends View
      */
     onNoteMousedown(e, el) {
 
-        let note = window.notes.find(+el.id)
+        let note = window.notes.find(+el.id).clone();
+        note.el = el;
 
-        this.currentSelection.clear().push({
-            note: note.cache(),
-            el: el
-        });
+        this.currentSelection.clear().push(note);
 
         this.lastCursorPositionX = e.pageX;
         this.lastCursorPositionY = e.pageY;
@@ -116,12 +118,12 @@ class PianoRollNotes extends View
             dragDistanceY = e.pageY - this.lastCursorPositionY,
             noteOffset = -Math.floor(dragDistanceY / this.rowHeightPx);
 
-        this.currentSelection.each(n => {
-            n.note.start = this._pxToBeats(dragDistanceX) + n.note.last('start');
-            n.note.note = n.note.last('note') + noteOffset;
-            this._renderNotePosition(n.el, n.note);
+        this.currentSelection.each(note => {
+            note.start = this._pxToBeats(dragDistanceX) + note.last('start'),
+            note.note = note.last('note') + noteOffset;
+            
+            this._renderNotePosition(note.el, note.start, note.note);
         });
-
 
         this.currentAction = 'notes:move';
     }
@@ -145,20 +147,21 @@ class PianoRollNotes extends View
     }
 
     onGlobalMouseup(e) {
-
         if(this.currentAction == 'notes:resize' || this.currentAction == 'notes:move') {
+
             this.bus.publish(this.currentAction, this.currentSelection.all());
-            this.currentAction = undefined;
 
             document.removeEventListener('mousemove', this.onNoteResize, false);
             document.removeEventListener('mousemove', this.onNoteMove, false);
+
+            this.currentAction = undefined;
         }
     }
 
     /**
      * DOM Functions
      * 
-     * Take an array of settings notes and update the DOM if necessary
+     * Take an array of settings and update the DOM if necessary
      * 
      * @param {array} notes 
      */
@@ -193,7 +196,7 @@ class PianoRollNotes extends View
                 result = this._createNoteElement(newNote);
                 this.el.appendChild(result);
             }
-            this._renderNotePosition(result, newNote);
+            this._renderNotePosition(result, newNote.start, newNote.note);
             this._setWidth(result, this._beatsToPx(newNote.end - newNote.start));
         });
     }
@@ -207,9 +210,9 @@ class PianoRollNotes extends View
         return el;
     }
 
-    _renderNotePosition(el, note) {
-        this._renderXPosition(el, this._beatsToPercent(note.start));
-        this._renderYPosition(el, (this.settings.nNotes - note.note) * this.rowHeightPx);
+    _renderNotePosition(el, start, note) {
+        this._renderXPosition(el, this._beatsToPercent(start));
+        this._renderYPosition(el, (this.settings.nNotes - note) * this.rowHeightPx);
     }
 
     _renderXPosition(el, position) {

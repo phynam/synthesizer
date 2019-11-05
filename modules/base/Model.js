@@ -21,17 +21,11 @@ class Model extends Module {
             });
         }, this);
 
-        this.id = Date.now() + ~~((Math.random() * 1000) + 1);
+        this.cache();
     }
 
-    toArray = (includeId) => {
-        let p = JSON.parse(JSON.stringify(this.properties));
-
-        if(includeId) {
-            p.id = this.id;
-        }
-
-        return p;
+    toArray = () => {
+        return JSON.parse(JSON.stringify(this.properties));
     }
 
     cache = () => {
@@ -41,5 +35,9 @@ class Model extends Module {
 
     last = (key) => {
         return this.oldProperties[key];
+    }
+
+    clone = () => {
+        return new this.constructor(this.toArray());
     }
 }
