@@ -2,7 +2,10 @@ class PianoRollNotes extends View
 {
     dragThresholdPx = 8;
     rowHeightPx = 15;
-    currentEl;
+
+    currentSelection;
+    lastCursorPositionY;
+    lastCursorPositionX;
 
     settings = {
         nBeatsInSequence: 16,
@@ -14,18 +17,23 @@ class PianoRollNotes extends View
         super(selector);
         this._bindHandlers();
 
+        this.currentSelection = new CurrentSelectionCollection();
+
+        /**
+         * Remove stray resize handlers.
+         */
         document.addEventListener('mouseup', this.removeMoveHandlers.bind(this));
 
         /**
          * Controller logic
          * 
-         * TODO: MOVE UP TO PARENT
+         * TODO: MOVE UP TO GLOBAL SINGLETON
          */
-        var notes = [
+        window.notes = [
             [2,2.25,127,127], [4,4.5,126,127], [3,3.75,125,127], [2,4,124,127]
         ];
 
-        notes = notes.map(n => {
+        window.notes = notes.map(n => {
             return new Model({
                 start: n[0],
                 end: n[1],
@@ -34,8 +42,10 @@ class PianoRollNotes extends View
             });
         });
 
+        window.notes = new Collection(window.notes);
+
         this.render({
-            notes: notes,
+            notes: window.notes.all(),
             nBeatsInSequence: 16,
             nNotes: 128
         });
@@ -43,7 +53,8 @@ class PianoRollNotes extends View
 
     handlers = {
         'mousedown:.piano-roll__note': this.onNoteMousedown,
-        'mouseup:.piano-roll__note': this.onNoteMouseup
+        'mouseup:.piano-roll__note': this.onNoteMouseup,
+        'click:.piano-roll__notes': this.onGridClick
     }
 
     /**
@@ -51,61 +62,75 @@ class PianoRollNotes extends View
      */
     onNoteMousedown(e, el) {
 
-        el.originalWidth = el.offsetWidth;
-        el.originalOffsetX = _(el).offset().left;
-        el.originalOffsetY = _(el).offset().top;
-        el.cursorStartX = e.x;
-        el.cursorStartY = e.y;
+        let note = window.notes.find(+el.id);
 
-        this.currentEl = el;
+        this.currentSelection.clear().push(note, el);
 
-        if(e.offsetX < this.dragThresholdPx || e.offsetX > el.offsetWidth - this.dragThresholdPx) {
+        this.lastCursorPositionX = e.pageX;
+        this.lastCursorPositionY = e.pageY;
+
+        this.onNoteMove = this.onNoteMove.bind(this);
+        document.addEventListener('mousemove', this.onNoteMove, false);
+
+        // el.originalWidth = el.offsetWidth;
+        // el.originalOffsetX = _(el).offset().left;
+        // el.originalOffsetY = _(el).offset().top;
+        // el.cursorStartX = e.x;
+        // el.cursorStartY = e.y;
+
+        // this.currentEl = el;
+
+        // if(e.offsetX < this.dragThresholdPx || e.offsetX > el.offsetWidth - this.dragThresholdPx) {
             
-            /**
-             * Resize note
-             */
-            this.onNoteResize = this.onNoteResize.bind(this);
-            this.currentEl.changeOffset = e.offsetX < this.dragThresholdPx;
+        //     /**
+        //      * Resize note
+        //      */
+        //     this.onNoteResize = this.onNoteResize.bind(this);
+        //     this.currentEl.changeOffset = e.offsetX < this.dragThresholdPx;
+        //     document.addEventListener('mousemove', this.onNoteResize, false);
+        // } else {
 
-            document.addEventListener('mousemove', this.onNoteResize, false);
-        } else {
+        //     /**
+        //      * Move note
+        //      */
+        //     this.onNoteMove = this.onNoteMove.bind(this);
+        //     document.addEventListener('mousemove', this.onNoteMove, false);
+        // }
+    }
 
-            /**
-             * Move note
-             */
-            this.onNoteMove = this.onNoteMove.bind(this);
+    onNoteMove(e) {
+        let dragDistanceX = e.pageX - this.lastCursorPositionX,
+            dragDistanceY = e.pageY - this.lastCursorPositionY,
+            noteOffset = -Math.floor(dragDistanceY / this.rowHeightPx);
 
-            document.addEventListener('mousemove', this.onNoteMove, false);
-        }
+        this.currentSelection.each(n => {
+
+            n.start = this._pxToBeats(dragDistanceX) + n.original.start;
+            n.note = n.original.note + noteOffset;
+
+            this._renderNotePosition(n.el, n);
+        });
     }
 
     onNoteMouseup(e) {
 
-        // Store value
     }
 
     onNoteResize(e) {
 
-        let offset = this._el.offset().left,
-            attenuation = e.x - this.currentEl.cursorStartX;
+        // let offset = this._el.offset().left,
+        //     attenuation = e.x - this.currentEl.cursorStartX;
 
-        if(this.currentEl.changeOffset) {
-            this._setXposition(this.currentEl, e.x - offset);
-            attenuation = -attenuation;
-        }
+        // if(this.currentEl.changeOffset) {
+        //     this._setXposition(this.currentEl, e.x - offset);
+        //     attenuation = -attenuation;
+        // }
 
-        this._setWidth(this.currentEl, attenuation + this.currentEl.originalWidth);
+        // this._setWidth(this.currentEl, attenuation + this.currentEl.originalWidth);
     }
 
-    onNoteMove(e) {
-
-        let offsetX = this._el.offset().left,
-            offsetY = this._el.offset().top,
-            cursorOffsetX = this.currentEl.cursorStartX - this.currentEl.originalOffsetX,
-            rowsMoved = Math.floor((this.currentEl.originalOffsetY - e.y) / this.rowHeightPx) + 1;
-            
-        this._setYposition(this.currentEl, -(rowsMoved * this.rowHeightPx) + (this.currentEl.originalOffsetY - offsetY));
-        this._setXposition(this.currentEl, e.x - offsetX - cursorOffsetX);
+    onGridClick(e) {
+        this.currentSelection.clear();
     }
 
     removeMoveHandlers() {
@@ -138,15 +163,6 @@ class PianoRollNotes extends View
     }
 
     /**
-     * Take an array of notes and remove them from the DOM
-     * 
-     * @param {array} notes 
-     */
-    delete(notes) {
-
-    }
-
-    /**
      * Internal DOM functions
      */
     _renderGrid() {
@@ -154,20 +170,14 @@ class PianoRollNotes extends View
     }
 
     _renderNotes(notes) {
-
         notes.forEach(newNote => {
-
-            // Find DOM note with matching id
             let result = document.getElementById(newNote.id);
-
-            // Create if it doesn't already exist and render to the DOM
             if(! result) {
                 result = this._createNoteElement(newNote);
                 this.el.appendChild(result);
             }
-
-            // Set position 
-            this._setNotePosition(result, newNote);
+            this._renderNotePosition(result, newNote);
+            this._setWidth(result, this._beatsToPx(newNote.end - newNote.start));
         });
     }
 
@@ -180,36 +190,43 @@ class PianoRollNotes extends View
         return el;
     }
 
-    _setNotePosition(el, note) {
-        this._setXposition(el, this.beatsToPx(note.start));
+    _renderNotePosition(el, note) {
+        this._setXposition(el, this._beatsToPercent(note.start));
         this._setYposition(el, (this.settings.nNotes - note.note) * this.rowHeightPx);
-        this._setWidth(el, this.beatsToPx(note.end - note.start));
     }
 
-    _setXposition(el, xOffset) {
-        el.style.left = `${this.pxToPercent(xOffset)}%` || el.style.left;
+    _setXposition(el, position) {
+        el.style.left = `${position}%` || el.style.left;
     }
 
-    _setYposition(el, yOffset) {
-        el.style.top = `${yOffset}px`;
+    _offsetXposition(el, xOffset, base) {
+        this._setXposition(el, (base || parseFloat(el.style.left)) + xOffset);
+    }
+
+    _setYposition(el, position) {
+        el.style.top = `${position}px`;
     }
 
     _setWidth(el, width) {
-        el.style.width = `${this.pxToPercent(width)}%` || el.style.width;
+        el.style.width = `${this._pxToPercent(width)}%` || el.style.width;
     }
 
     /**
      * Helper functions
      */
-    beatsToPercent(beats) {
+    _pxToBeats(px) {
+        return px / this.el.offsetWidth * this.settings.nBeatsInSequence;
+    }
+
+    _beatsToPercent(beats) {
         return beats / this.settings.nBeatsInSequence * 100;
     }
 
-    beatsToPx(beats) {
+    _beatsToPx(beats) {
         return beats / this.settings.nBeatsInSequence * this.el.offsetWidth;
     }
 
-    pxToPercent(px) {
+    _pxToPercent(px) {
         return px / this.el.offsetWidth * 100;
     }
 }
