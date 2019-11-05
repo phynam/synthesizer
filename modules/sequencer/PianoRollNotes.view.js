@@ -76,7 +76,9 @@ class PianoRollNotes extends View
         payload.each(item => {
             let note = window.notes.find(item.id);
 
-            note.properties = item.properties;
+            Object.keys(note.properties).forEach(key => {
+                note.properties[key] = item.properties[key]
+            });
         });
 
         this.render({
@@ -132,7 +134,8 @@ class PianoRollNotes extends View
             noteOffset = -Math.floor(dragDistanceY / this.rowHeightPx);
 
         this.currentSelection.each(note => {
-            note.start = this._pxToBeats(dragDistanceX) + note.last('start'),
+            note.start = this._pxToBeats(dragDistanceX) + note.last('start');
+            note.end = note.last('end') - note.last('start') + note.start;
             note.note = note.last('note') + noteOffset;
             
             this._renderNotePosition(note.el, note.start, note.note);
