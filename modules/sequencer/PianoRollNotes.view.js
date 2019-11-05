@@ -77,13 +77,14 @@ class PianoRollNotes extends View
             let note = window.notes.find(item.id);
 
             Object.keys(note.properties).forEach(key => {
-                note.properties[key] = item.properties[key]
+                note[key] = item.properties[key]
             });
         });
 
         this.render({
             notes: window.notes.all()
         });
+        
     }
 
     /**
@@ -134,9 +135,12 @@ class PianoRollNotes extends View
             noteOffset = -Math.floor((dragDistanceY + this.rowHeightPx / 2) / this.rowHeightPx);
 
         this.currentSelection.each(note => {
+            // TODO: Only do this if values are different, expensive
             note.start = this._pxToBeats(dragDistanceX) + note.last('start');
             note.end = note.last('end') - note.last('start') + note.start;
             note.note = note.last('note') + noteOffset;
+
+            console.log(note.note);
             
             this._renderNotePosition(note.el, note.start, note.note);
         });

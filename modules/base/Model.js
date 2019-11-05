@@ -12,10 +12,16 @@ class Model extends Module {
 
         Object.keys(properties).forEach(prop => {
             Object.defineProperty(this, prop, {
-                get: function () {
+                get: function(val) {
+                    if(this.onGet) {
+                        this.onGet(prop, val);
+                    }
                     return properties[prop];
                 },
-                set: function (val) {
+                set: function(val) {
+                    if(this.onSet) {
+                        this.onSet(prop, val);
+                    }
                     properties[prop] = val;
                 }
             });
