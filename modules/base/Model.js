@@ -14,15 +14,17 @@ class Model extends Module {
             Object.defineProperty(this, prop, {
                 get: function(val) {
                     if(this.onGet) {
-                        this.onGet(prop, val);
+                        this.onGet(prop, properties[prop]);
+                    } else {
+                        return properties[prop];
                     }
-                    return properties[prop];
                 },
                 set: function(val) {
                     if(this.onSet) {
                         this.onSet(prop, val);
+                    } else {
+                        properties[prop] = val;
                     }
-                    properties[prop] = val;
                 }
             });
         }, this);
