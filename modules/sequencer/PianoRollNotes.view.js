@@ -70,25 +70,24 @@ class PianoRollNotes extends View
     }
 
     /**
-     * Bus Handlers
+     * Bus Event Handlers
      */
     onNotesMove(payload) {
         payload.each(item => {
             let note = window.notes.find(item.id);
-
             Object.keys(note.properties).forEach(key => {
                 note[key] = item.properties[key]
             });
         });
 
+        // TODO: Update model in collection above, then here listen to collection events?
         this.render({
             notes: window.notes.all()
         });
-        
     }
 
     /**
-     * Event Handlers
+     * Interface Event Handlers
      */
     onNoteMousedown(e, el) {
 
@@ -139,8 +138,6 @@ class PianoRollNotes extends View
             note.start = this._pxToBeats(dragDistanceX) + note.last('start');
             note.end = note.last('end') - note.last('start') + note.start;
             note.note = note.last('note') + noteOffset;
-
-            console.log(note.note);
             
             this._renderNotePosition(note.el, note.start, note.note);
         });
@@ -175,11 +172,11 @@ class PianoRollNotes extends View
 
             this.bus.publish(this.currentAction, this.currentSelection);
 
-            document.removeEventListener('mousemove', this.onNoteResize, false);
-            document.removeEventListener('mousemove', this.onNoteMove, false);
-
             this.currentAction = undefined;
         }
+
+        document.removeEventListener('mousemove', this.onNoteResize, false);
+        document.removeEventListener('mousemove', this.onNoteMove, false);
     }
 
     /**
@@ -191,6 +188,7 @@ class PianoRollNotes extends View
      */
     render(settings) {
 
+        // TODO: Move to another view?
         if(settings.nBeatsInSequence) {
             this.settings.nBeatsInSequence = settings.nBeatsInSequence;
             this._renderGrid();
