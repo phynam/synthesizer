@@ -3,11 +3,11 @@
  * 
  * TODO: DELETE
  */
-window.notes = [
+var n = [
     [2,2.25,127,127], [4,4.5,126,127], [3,3.75,125,127], [2,4,124,127]
 ];
 
-window.notes = notes.map(n => {
+n = n.map(n => {
     return new NoteModel({
         id: Date.now() + ~~((Math.random() * 1000) + 1),
         start: n[0],
@@ -17,7 +17,13 @@ window.notes = notes.map(n => {
     });
 });
 
-window.notes = new Collection(window.notes);
+window.notes = new Collection();
+
+window.notes.bus.subscribe('item:set', function() {
+    console.log('got it');
+});
+
+window.notes.set(n);
 
 
 //////////////////

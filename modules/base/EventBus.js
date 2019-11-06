@@ -10,7 +10,9 @@ class EventBus
      */
     publish(eventName, payload)
     {
-        this.events[eventName] && this.events[eventName](payload);
+        this.events[eventName].forEach(cb => {
+            cb && cb(payload);
+        });
     }
 
     /**
@@ -21,6 +23,10 @@ class EventBus
      */
     subscribe(eventName, callback)
     {
-        this.events[eventName] = callback;
+        if(! this.events[eventName]) {
+            this.events[eventName] = [];
+        }
+
+        this.events[eventName].push(callback);
     }
 }
