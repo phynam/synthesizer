@@ -234,7 +234,7 @@ class PianoRollNotes extends View
 
     _renderNotePosition(el, start, note) {
         this._renderXPosition(el, this._beatsToPercent(start));
-        this._renderYPosition(el, (this.settings.nNotes - note) * this.rowHeightPx);
+        this._renderYPosition(el, (this.settings.nNotes - note - 1) * this.rowHeightPx);
     }
 
     _renderXPosition(el, position) {
