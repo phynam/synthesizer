@@ -65,8 +65,8 @@ class PianoRollNotes extends View
     }
 
     interfaceHandlers = {
-        'mousedown:.piano-roll__note': this.onNoteMousedown,
-        'click:.piano-roll__notes': this.onGridClick
+        '.piano-roll__note:mousedown': this.onNoteMousedown,
+        '.piano-roll__notes:click': this.onGridClick
     }
 
     /**

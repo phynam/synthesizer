@@ -41,7 +41,7 @@ class View extends Module
      */
     _bindInterfaceHandlers() {
         Object.keys(this.interfaceHandlers).forEach(key => {
-            let [eventName, selector] = key.split(':');
+            let [selector, eventName] = key.split(':');
             this._bindInterfaceHandler(selector, eventName, this.interfaceHandlers[key])
         });
     }
