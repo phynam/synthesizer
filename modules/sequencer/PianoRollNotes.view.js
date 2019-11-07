@@ -1,50 +1,11 @@
-/**
- * Controller logic
- * 
- * TODO: DELETE
- */
-var n = [
-    [2,2.25,127,127], [4,4.5,126,127], [3,3.75,125,127], [2,4,124,127]
-];
-
-n = n.map(n => {
-    return new NoteModel({
-        id: Date.now() + ~~((Math.random() * 1000) + 1),
-        start: n[0],
-        end: n[1],
-        note: n[2],
-        velocity: n[3]
-    });
-});
-
-window.notes = new Collection();
-
-window.notes.bus.subscribe('item:set', function() {
-    console.log('got it');
-});
-
-window.notes.set(n);
-
-
-//////////////////
-
-
-
 class PianoRollNotes extends View
 {
     dragThresholdPx = 8;
     rowHeightPx = 15;
 
-    currentSelection;
     lastCursorPositionY;
     lastCursorPositionX;
     currentAction;
-
-    // TODO: Move to some global singleton
-    settings = {
-        nBeatsInSequence: 16,
-        nNotes: 128
-    }
 
     constructor(selector)
     {
@@ -53,47 +14,20 @@ class PianoRollNotes extends View
         this._bindInterfaceHandlers();
         this._bindBusHandlers();
 
-        this.currentSelection = new Collection();
+        let self = this;
+
+        sequencer.store.notes.bus.subscribe('set', () => {
+            self.render();
+        });
+
+        sequencer.store.notes.bus.subscribe('item:set', (prop, val) => {
+            self.render();
+        });
 
         /**
          * Remove stray resize handlers.
          */
         document.addEventListener('mouseup', this.onGlobalMouseup.bind(this));
-
-        this.render({
-            notes: window.notes.all(),
-            nBeatsInSequence: 16,
-            nNotes: 128
-        });
-    }
-
-    busHandlers = {
-        'notes:move': payload => {
-            payload.each(item => {
-                let note = window.notes.find(item.id);
-                Object.keys(note.properties).forEach(key => {
-                    note[key] = item.properties[key]
-                });
-            });
-    
-            // TODO: Update model in collection above, then here listen to collection events?
-            this.render({
-                notes: window.notes.all()
-            });
-        },
-        'notes:resize': payload => {
-            payload.each(item => {
-                let note = window.notes.find(item.id);
-                Object.keys(note.properties).forEach(key => {
-                    note[key] = item.properties[key]
-                });
-            });
-    
-            // TODO: Update model in collection above, then here listen to collection events?
-            this.render({
-                notes: window.notes.all()
-            });
-        }
     }
 
     interfaceHandlers = {
@@ -108,12 +42,12 @@ class PianoRollNotes extends View
 
         e.preventDefault();
 
-        let note = window.notes.find(+el.id).clone(),
+        let note = sequencer.store.notes.find(+el.id).clone(),
             handler = this.onNoteMove = this.onNoteMove.bind(this);
 
         note.el = el;
 
-        this.currentSelection.clear().push(note);
+        sequencer.store.selection.clear().push(note);
 
         this.lastCursorPositionX = e.pageX;
         this.lastCursorPositionY = e.pageY;
@@ -135,7 +69,7 @@ class PianoRollNotes extends View
             noteOffset = -Math.floor((dragDistanceY + this.rowHeightPx / 2) / this.rowHeightPx),
             noteOffsetBeats = this._pxToBeats(dragDistanceX);
 
-        this.currentSelection.each(note => {
+        sequencer.store.selection.each(note => {
             note.start = noteOffsetBeats + note.last('start');
             note.end = note.last('end') - note.last('start') + note.start;
             note.note = note.last('note') + noteOffset;
@@ -150,7 +84,7 @@ class PianoRollNotes extends View
 
         let dragDistance = this._pxToBeats(e.pageX - this.lastCursorPositionX);
 
-        this.currentSelection.each(note => {
+        sequencer.store.selection.each(note => {
             note.start = note.last('start') + dragDistance;
             this._renderXPosition(note.el, this._beatsToPercent(note.start));
             this._renderWidth(note.el, this._beatsToPercent(note.end - note.start));
@@ -163,7 +97,7 @@ class PianoRollNotes extends View
 
         let dragDistance = this._pxToBeats(e.pageX - this.lastCursorPositionX);
 
-        this.currentSelection.each(note => {
+        sequencer.store.selection.each(note => {
             note.end = note.last('end') + dragDistance;
             this._renderWidth(note.el, this._beatsToPercent(note.end - note.start));
         });
@@ -172,17 +106,15 @@ class PianoRollNotes extends View
     }
 
     onGridClick(e) {
-        this.currentSelection.clear();
+        sequencer.store.selection.clear();
     }
 
     onGlobalMouseup(e) {
-        if(['notes:resize', 'notes:move'].includes(this.currentAction)) {
-
-            this.currentSelection.each(selection => {
-                selection.cache();
+        if('notes:resize, notes:move'.includes(this.currentAction)) {
+            sequencer.store.selection.each(item => {
+                item.cache();
+                sequencer.store.notes.find(item.id).set(item.properties);
             });
-
-            this.bus.publish(this.currentAction, this.currentSelection);
 
             this.currentAction = undefined;
         }
@@ -196,24 +128,22 @@ class PianoRollNotes extends View
      * DOM Functions
      * 
      * Take an array of settings and update the DOM if necessary
-     * 
-     * @param {array} notes 
      */
-    render(settings) {
+    render() {
 
         // TODO: Move to another view?
-        if(settings.nBeatsInSequence) {
-            this.settings.nBeatsInSequence = settings.nBeatsInSequence;
+        if(sequencer.store.nBeatsInSequence) {
+            sequencer.store.nBeatsInSequence = sequencer.store.nBeatsInSequence;
             this._renderGrid();
         }
 
-        if(settings.nNotes) {
-            this.settings.nNotes = settings.nNotes;
+        if(sequencer.store.nNotes) {
+            sequencer.store.nNotes = sequencer.store.nNotes;
             this._renderGrid();
         }
 
-        if(settings.notes) {
-            this._renderNotes(settings.notes);
+        if(sequencer.store.notes.size) {
+            this._renderNotes(sequencer.store.notes);
         }
     }
 
@@ -221,11 +151,11 @@ class PianoRollNotes extends View
      * Internal DOM functions
      */
     _renderGrid() {
-        this.el.style.height = `${(this.settings.nNotes) * this.rowHeightPx}px`;
+        this.el.style.height = `${(sequencer.store.nNotes) * this.rowHeightPx}px`;
     }
 
     _renderNotes(notes) {
-        notes.forEach(newNote => {
+        notes.each(newNote => {
             let result = document.getElementById(newNote.id);
             if(! result) {
                 result = this._createNoteElement(newNote);
@@ -247,7 +177,7 @@ class PianoRollNotes extends View
 
     _renderNotePosition(el, start, note) {
         this._renderXPosition(el, this._beatsToPercent(start));
-        this._renderYPosition(el, (this.settings.nNotes - note - 1) * this.rowHeightPx);
+        this._renderYPosition(el, (sequencer.store.nNotes - note - 1) * this.rowHeightPx);
     }
 
     _renderXPosition(el, position) {
@@ -266,15 +196,15 @@ class PianoRollNotes extends View
      * Helper functions
      */
     _pxToBeats(px) {
-        return px / this.el.offsetWidth * this.settings.nBeatsInSequence;
+        return px / this.el.offsetWidth * sequencer.store.nBeatsInSequence;
     }
 
     _beatsToPercent(beats) {
-        return beats / this.settings.nBeatsInSequence * 100;
+        return beats / sequencer.store.nBeatsInSequence * 100;
     }
 
     _beatsToPx(beats) {
-        return beats / this.settings.nBeatsInSequence * this.el.offsetWidth;
+        return beats / sequencer.store.nBeatsInSequence * this.el.offsetWidth;
     }
 
     _pxToPercent(px) {

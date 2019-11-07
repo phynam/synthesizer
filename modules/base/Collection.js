@@ -6,7 +6,7 @@ class Collection extends Module
     {
         super();
         
-        this.set(items);
+        this.set(items, true);
     }
 
     all = () => {
@@ -24,9 +24,12 @@ class Collection extends Module
         return this;
     }
 
-    set = (items) => {
-        this.items = items;
+    size = () => {
+        return this.items.length;
+    }
 
+    set = (items, quiet = false) => {
+        this.items = items || [];
         this.each(item => {
 
             // TODO: This sucks, rewrite it.
@@ -41,6 +44,10 @@ class Collection extends Module
                 });
             }
         });
+
+        if(!quiet) {
+            this.bus.publish('set', items);
+        }
 
         return this;
     }

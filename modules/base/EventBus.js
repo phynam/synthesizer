@@ -6,12 +6,12 @@ class EventBus
      * Publish a given event.
      * 
      * @param {string} eventName 
-     * @param {object} payload 
+     * @param {array} args
      */
-    publish(eventName, payload)
+    publish(eventName, ...args)
     {
-        this.events[eventName].forEach(cb => {
-            cb && cb(payload);
+        this.events[eventName] && this.events[eventName].forEach(cb => {
+            cb && cb(...args);
         });
     }
 
