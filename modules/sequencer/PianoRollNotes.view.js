@@ -17,33 +17,33 @@ class PianoRollNotes extends View
         let self = this;
 
         sequencer.store.notes.bus.subscribe('set', () => {
-            self.render();
+            self.renderNotes();
         });
 
         sequencer.store.notes.bus.subscribe('item:set', (prop, val) => {
-            self.render();
+            self.renderNotes();
         });
 
         /**
          * Remove stray resize handlers.
          */
-        document.addEventListener('mouseup', this.onGlobalMouseup.bind(this));
+        document.addEventListener('mouseup', this._onGlobalMouseup.bind(this));
     }
 
     interfaceHandlers = {
-        '.piano-roll__note:mousedown': this.onNoteMousedown,
-        '.piano-roll__notes:click': this.onGridClick
+        '.piano-roll__note:mousedown': this._onNoteMousedown,
+        '.piano-roll__notes:click': this._onGridClick
     }
 
     /**
      * Interface Event Handlers
      */
-    onNoteMousedown(e, el) {
+    _onNoteMousedown(e, el) {
 
         e.preventDefault();
 
         let note = sequencer.store.notes.find(+el.id).clone(),
-            handler = this.onNoteMove = this.onNoteMove.bind(this);
+            handler = this._onNoteMove = this._onNoteMove.bind(this);
 
         note.el = el;
 
@@ -54,20 +54,21 @@ class PianoRollNotes extends View
 
         if(e.offsetX < this.dragThresholdPx) {
             handler = this.onNoteResizeLeft = this.onNoteResizeLeft.bind(this);
+            this.currentAction = 'notes:resize';
         }
 
         if(e.offsetX > el.offsetWidth - this.dragThresholdPx) {
-            handler = this.onNoteResizeRight = this.onNoteResizeRight.bind(this);
+            handler = this._onNoteResizeRight = this._onNoteResizeRight.bind(this);
+            this.currentAction = 'notes:resize';
         }
 
         document.addEventListener('mousemove', handler, false);
+        this.currentAction = 'notes:move';
     }
 
-    onNoteMove(e) {
-        let dragDistanceX = e.pageX - this.lastCursorPositionX,
-            dragDistanceY = e.pageY - this.lastCursorPositionY,
-            noteOffset = -Math.floor((dragDistanceY + this.rowHeightPx / 2) / this.rowHeightPx),
-            noteOffsetBeats = this._pxToBeats(dragDistanceX);
+    _onNoteMove(e) {
+        let noteOffset = -Math.floor((this._dragY(e) + this.rowHeightPx / 2) / this.rowHeightPx),
+            noteOffsetBeats = this._pxToBeats(this._dragX(e));
 
         sequencer.store.selection.each(note => {
             note.start = noteOffsetBeats + note.last('start');
@@ -76,40 +77,28 @@ class PianoRollNotes extends View
 
             this._renderNotePosition(note.el, note.start, note.note);
         });
-
-        this.currentAction = 'notes:move';
     }
 
-    onNoteResizeLeft(e) {
-
-        let dragDistance = this._pxToBeats(e.pageX - this.lastCursorPositionX);
-
+    _onNoteResizeLeft(e) {
         sequencer.store.selection.each(note => {
-            note.start = note.last('start') + dragDistance;
+            note.start = note.last('start') + this._pxToBeats(_this.dragX(e));
             this._renderXPosition(note.el, this._beatsToPercent(note.start));
             this._renderWidth(note.el, this._beatsToPercent(note.end - note.start));
         });
-
-        this.currentAction = 'notes:resize';
     }
 
-    onNoteResizeRight(e) {
-
-        let dragDistance = this._pxToBeats(e.pageX - this.lastCursorPositionX);
-
+    _onNoteResizeRight(e) {
         sequencer.store.selection.each(note => {
-            note.end = note.last('end') + dragDistance;
+            note.end = note.last('end') + this._pxToBeats(_this.dragX(e));
             this._renderWidth(note.el, this._beatsToPercent(note.end - note.start));
         });
-
-        this.currentAction = 'notes:resize';
     }
 
-    onGridClick(e) {
+    _onGridClick(e) {
         sequencer.store.selection.clear();
     }
 
-    onGlobalMouseup(e) {
+    _onGlobalMouseup(e) {
         if('notes:resize, notes:move'.includes(this.currentAction)) {
             sequencer.store.selection.each(item => {
                 item.cache();
@@ -120,42 +109,19 @@ class PianoRollNotes extends View
         }
 
         document.removeEventListener('mousemove', this.onNoteResizeLeft, false);
-        document.removeEventListener('mousemove', this.onNoteResizeRight, false);
-        document.removeEventListener('mousemove', this.onNoteMove, false);
+        document.removeEventListener('mousemove', this._onNoteResizeRight, false);
+        document.removeEventListener('mousemove', this._onNoteMove, false);
     }
 
     /**
-     * DOM Functions
-     * 
-     * Take an array of settings and update the DOM if necessary
+     * Render functions
      */
-    render() {
-
-        // TODO: Move to another view?
-        if(sequencer.store.nBeatsInSequence) {
-            sequencer.store.nBeatsInSequence = sequencer.store.nBeatsInSequence;
-            this._renderGrid();
-        }
-
-        if(sequencer.store.nNotes) {
-            sequencer.store.nNotes = sequencer.store.nNotes;
-            this._renderGrid();
-        }
-
-        if(sequencer.store.notes.size) {
-            this._renderNotes(sequencer.store.notes);
-        }
-    }
-
-    /**
-     * Internal DOM functions
-     */
-    _renderGrid() {
+    renderGrid() {
         this.el.style.height = `${(sequencer.store.nNotes) * this.rowHeightPx}px`;
     }
 
-    _renderNotes(notes) {
-        notes.each(newNote => {
+    renderNotes() {
+        sequencer.store.notes.each(newNote => {
             let result = document.getElementById(newNote.id);
             if(! result) {
                 result = this._createNoteElement(newNote);
@@ -164,15 +130,6 @@ class PianoRollNotes extends View
             this._renderNotePosition(result, newNote.start, newNote.note);
             this._renderWidth(result, this._beatsToPercent(newNote.end - newNote.start));
         });
-    }
-
-    _createNoteElement(note) {
-        let el = document.createElement('div');
-        el.classList.add('piano-roll__note');
-        el.id = note.id;
-        el.noteID = note.id;
-
-        return el;
     }
 
     _renderNotePosition(el, start, note) {
@@ -203,12 +160,21 @@ class PianoRollNotes extends View
         return beats / sequencer.store.nBeatsInSequence * 100;
     }
 
-    _beatsToPx(beats) {
-        return beats / sequencer.store.nBeatsInSequence * this.el.offsetWidth;
+    _createNoteElement(note) {
+        let el = document.createElement('div');
+        el.classList.add('piano-roll__note');
+        el.id = note.id;
+        el.noteID = note.id;
+
+        return el;
     }
 
-    _pxToPercent(px) {
-        return px / this.el.offsetWidth * 100;
+    _dragY(e) {
+        return e.pageY - this.lastCursorPositionY;
+    }
+
+    _dragX(e) {
+        return e.pageX - this.lastCursorPositionX;
     }
 }
 
