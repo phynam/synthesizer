@@ -20,6 +20,6 @@ class NoteModel extends Model {
             val = 0;
         }
 
-        this.properties[prop] = val;
+        return val;
     }
 }

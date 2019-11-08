@@ -5,7 +5,7 @@ class PianoRollNotes extends View
 
     lastCursorPositionY;
     lastCursorPositionX;
-    currentAction;
+    isDragging;
 
     constructor(selector)
     {
@@ -24,14 +24,15 @@ class PianoRollNotes extends View
         });
 
         sequencer.store.selection.subscribe('item:update', (updates, note) => {
-            if(updates.note) {
+;
+            if(updates.note >= 0) {
                 this._renderNoteInRow(note.el, updates.note);
             }
 
-            if(updates.start || updates.end) {
+            if(updates.start >= 0 || updates.end) {
                 this._renderWidth(note.el, this._beatsToPercent(note.end - note.start));
 
-                if(updates.start) {
+                if(updates.start >= 0) {
                     this._renderXPosition(note.el, this._beatsToPercent(updates.start));
                 }
             }
@@ -67,16 +68,14 @@ class PianoRollNotes extends View
 
         if(e.offsetX < this.dragThresholdPx) {
             handler = this._onNoteResizeLeft = this._onNoteResizeLeft.bind(this);
-            this.currentAction = 'notes:resize';
         }
 
         if(e.offsetX > el.offsetWidth - this.dragThresholdPx) {
             handler = this._onNoteResizeRight = this._onNoteResizeRight.bind(this);
-            this.currentAction = 'notes:resize';
         }
 
         document.addEventListener('mousemove', handler, false);
-        this.currentAction = 'notes:move';
+        this.isDragging = true;
     }
 
     _onNoteMove(e) {
@@ -113,12 +112,12 @@ class PianoRollNotes extends View
     }
 
     _onGlobalMouseup(e) {
-        if('notes:resize, notes:move'.includes(this.currentAction)) {
+        if(this.isDragging) {
             sequencer.store.selection.each(item => {
                 sequencer.store.notes.find(item.id).update(item.properties, true);
             });
 
-            this.currentAction = undefined;
+            this.isDragging = false;
         }
 
         document.removeEventListener('mousemove', this._onNoteResizeLeft, false);

@@ -39,18 +39,16 @@ class Model extends Module {
             this._defineProperty(key);
         }
 
-        if(this.onSet) {
-            this.onSet(key, val);
-        } else {
-            this.properties[key] = val;
-        }
+        this.properties[key] = (this.onSet) ? this.onSet(key, val) : val;
         
-        this.publish('set', key, val, this);
+        this.publish('set', key, this.properties[key], this);
+
+        return this.properties[key];
     }
 
     update = (settings) => {
         Object.keys(settings).forEach(key => {
-            this.set(key, settings[key]);
+            settings[key] = this.set(key, settings[key]);
         });
 
         this.publish('update', settings, this);
