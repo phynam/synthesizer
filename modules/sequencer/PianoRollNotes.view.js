@@ -14,7 +14,6 @@ class PianoRollNotes extends View
         this._bindInterfaceHandlers();
         this._bindBusHandlers();
 
-        // TODO: Change to notes:create 
         sequencer.store.notes.subscribe('set', () => {
             this.renderNotes();
         });
@@ -24,7 +23,6 @@ class PianoRollNotes extends View
         });
 
         sequencer.store.selection.subscribe('item:update', (updates, note) => {
-;
             if(updates.note >= 0) {
                 this._renderNoteInRow(note.el, updates.note);
             }
@@ -36,6 +34,10 @@ class PianoRollNotes extends View
                     this._renderXPosition(note.el, this._beatsToPercent(updates.start));
                 }
             }
+        });
+
+        sequencer.store.notes.subscribe('push', (note) => {
+            this.renderNotes();
         });
 
         /**
@@ -109,6 +111,12 @@ class PianoRollNotes extends View
 
     _onGridClick(e) {
         sequencer.store.selection.clear();
+        sequencer.store.notes.push(new NoteModel({
+            start: this._pxToBeats(e.pageX),
+            velocity: 127,
+            note: 127,
+            end: this._pxToBeats(e.pageX) + 1
+        }));
     }
 
     _onGlobalMouseup(e) {
@@ -189,5 +197,3 @@ class PianoRollNotes extends View
         return e.pageX - this.lastCursorPositionX;
     }
 }
-
-window.PianoRollNotes = PianoRollNotes;

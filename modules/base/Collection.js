@@ -22,6 +22,7 @@ class Collection extends Module
     push = (item) => {
         this._bindChildHandlers(item);
         this.items.push(item);
+        this.publish('push', item);
         return this;
     }
 

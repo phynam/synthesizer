@@ -2,7 +2,11 @@ class NoteModel extends Model {
 
     constructor(properties)
     {
-        super(properties);
+        let defaults = {
+            id: Date.now() + ~~((Math.random() * 1000) + 1)
+        };
+
+        super(Object.assign({}, defaults, properties));
     }
 
     onSet(prop, val) {

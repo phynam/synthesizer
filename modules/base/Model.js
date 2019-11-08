@@ -2,12 +2,14 @@ class Model extends Module {
 
     properties = {};
     oldProperties = {};
+    defaults = {};
 
     constructor(properties)
     {
         super();
 
         if(properties) {
+            properties = Object.assign({}, this.defaults, properties);
             this.update(properties);
             this.cache();
         }

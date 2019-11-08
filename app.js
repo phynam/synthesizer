@@ -11,7 +11,6 @@
     
     n = n.map(n => {
         return new NoteModel({
-            id: Date.now() + ~~((Math.random() * 1000) + 1),
             start: n[0],
             end: n[1],
             note: n[2],
