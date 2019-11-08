@@ -20,6 +20,7 @@ class Collection extends Module
     }
 
     push = (item) => {
+        this._bindChildHandlers(item);
         this.items.push(item);
         return this;
     }
@@ -29,24 +30,18 @@ class Collection extends Module
     }
 
     set = (items, quiet = false) => {
-        this.items = items || [];
-        this.each(item => {
+        if(!items) {
+            return;
+        }
 
-            // TODO: This sucks, rewrite it.
-            
-            if(item instanceof Module) {
-                Object.keys(this.bus.events).forEach(eventName => {
-                    if(eventName.includes('item')) {
-                        this.bus.events[eventName].forEach(f => {
-                            item.bus.subscribe(eventName.split(':')[1], f);
-                        });
-                    }
-                });
-            }
+        items.forEach(item => {
+            this._bindChildHandlers(item);
         });
 
+        this.items = items;
+
         if(!quiet) {
-            this.bus.publish('set', items);
+            this.publish('set', items);
         }
 
         return this;
@@ -61,5 +56,20 @@ class Collection extends Module
     clear = () => {
         this.items = [];
         return this;
+    }
+
+    _bindChildHandlers = (item) => {
+
+        // TODO: Rewrite this... 
+        
+        if(item instanceof Module) {
+            Object.keys(this.events).forEach(eventName => {
+                if(eventName.includes('item')) {
+                    this.events[eventName].forEach(f => {
+                        item.subscribe(eventName.split(':')[1], f);
+                    });
+                }
+            });
+        }
     }
 }

@@ -14,14 +14,27 @@ class PianoRollNotes extends View
         this._bindInterfaceHandlers();
         this._bindBusHandlers();
 
-        let self = this;
-
-        sequencer.store.notes.bus.subscribe('set', () => {
-            self.renderNotes();
+        // TODO: Change to notes:create 
+        sequencer.store.notes.subscribe('set', () => {
+            this.renderNotes();
         });
 
-        sequencer.store.notes.bus.subscribe('item:set', (prop, val) => {
-            self.renderNotes();
+        sequencer.store.notes.subscribe('item:update', () => {
+            this.renderNotes();
+        });
+
+        sequencer.store.selection.subscribe('item:update', (updates, note) => {
+            if(updates.note) {
+                this._renderNoteInRow(note.el, updates.note);
+            }
+
+            if(updates.start || updates.end) {
+                this._renderWidth(note.el, this._beatsToPercent(note.end - note.start));
+
+                if(updates.start) {
+                    this._renderXPosition(note.el, this._beatsToPercent(updates.start));
+                }
+            }
         });
 
         /**
@@ -53,7 +66,7 @@ class PianoRollNotes extends View
         this.lastCursorPositionY = e.pageY;
 
         if(e.offsetX < this.dragThresholdPx) {
-            handler = this.onNoteResizeLeft = this.onNoteResizeLeft.bind(this);
+            handler = this._onNoteResizeLeft = this._onNoteResizeLeft.bind(this);
             this.currentAction = 'notes:resize';
         }
 
@@ -71,26 +84,27 @@ class PianoRollNotes extends View
             noteOffsetBeats = this._pxToBeats(this._dragX(e));
 
         sequencer.store.selection.each(note => {
-            note.start = noteOffsetBeats + note.last('start');
-            note.end = note.last('end') - note.last('start') + note.start;
-            note.note = note.last('note') + noteOffset;
-
-            this._renderNotePosition(note.el, note.start, note.note);
+            note.update({
+                start: noteOffsetBeats + note.last('start'),
+                end: note.last('end') - note.last('start') + note.start,
+                note: note.last('note') + noteOffset
+            });
         });
     }
 
     _onNoteResizeLeft(e) {
         sequencer.store.selection.each(note => {
-            note.start = note.last('start') + this._pxToBeats(_this.dragX(e));
-            this._renderXPosition(note.el, this._beatsToPercent(note.start));
-            this._renderWidth(note.el, this._beatsToPercent(note.end - note.start));
+            note.update({
+                start: note.last('start') + this._pxToBeats(this._dragX(e))
+            });
         });
     }
 
     _onNoteResizeRight(e) {
         sequencer.store.selection.each(note => {
-            note.end = note.last('end') + this._pxToBeats(_this.dragX(e));
-            this._renderWidth(note.el, this._beatsToPercent(note.end - note.start));
+            note.update({
+                end: note.last('end') + this._pxToBeats(this._dragX(e))
+            });
         });
     }
 
@@ -101,14 +115,13 @@ class PianoRollNotes extends View
     _onGlobalMouseup(e) {
         if('notes:resize, notes:move'.includes(this.currentAction)) {
             sequencer.store.selection.each(item => {
-                item.cache();
-                sequencer.store.notes.find(item.id).set(item.properties);
+                sequencer.store.notes.find(item.id).update(item.properties, true);
             });
 
             this.currentAction = undefined;
         }
 
-        document.removeEventListener('mousemove', this.onNoteResizeLeft, false);
+        document.removeEventListener('mousemove', this._onNoteResizeLeft, false);
         document.removeEventListener('mousemove', this._onNoteResizeRight, false);
         document.removeEventListener('mousemove', this._onNoteMove, false);
     }
@@ -127,13 +140,13 @@ class PianoRollNotes extends View
                 result = this._createNoteElement(newNote);
                 this.el.appendChild(result);
             }
-            this._renderNotePosition(result, newNote.start, newNote.note);
+            this._renderXPosition(result, this._beatsToPercent(newNote.start));
+            this._renderNoteInRow(result, newNote.note);
             this._renderWidth(result, this._beatsToPercent(newNote.end - newNote.start));
         });
     }
 
-    _renderNotePosition(el, start, note) {
-        this._renderXPosition(el, this._beatsToPercent(start));
+    _renderNoteInRow(el, note) {
         this._renderYPosition(el, (sequencer.store.nNotes - note - 1) * this.rowHeightPx);
     }
 

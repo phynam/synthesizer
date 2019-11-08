@@ -8,7 +8,7 @@ class Model extends Module {
         super();
 
         if(properties) {
-            this.set(properties);
+            this.update(properties);
             this.cache();
         }
     }
@@ -30,27 +30,30 @@ class Model extends Module {
         return new this.constructor(this.toArray());
     }
 
-    set = (sample, val) => {
-
-        if(typeof sample === 'object') {
-            Object.keys(sample).forEach(key => {
-                this.set(key, sample[key]);
-            });
+    set = (key, val) => {
+        if(this.properties[key] === val) {
+            return;
         }
 
-        if(typeof sample === 'string' && val) {
-            if(this.properties[sample] === val) {
-                return;
-            }
-
-            if(! Object.getOwnPropertyDescriptor(this, sample)) {
-                this._defineProperty(sample);
-            }
-
-            this.properties[sample] = val;
-            
-            this.bus.publish('set', sample, val);
+        if(! Object.getOwnPropertyDescriptor(this, key)) {
+            this._defineProperty(key);
         }
+
+        if(this.onSet) {
+            this.onSet(key, val);
+        } else {
+            this.properties[key] = val;
+        }
+        
+        this.publish('set', key, val, this);
+    }
+
+    update = (settings) => {
+        Object.keys(settings).forEach(key => {
+            this.set(key, settings[key]);
+        });
+
+        this.publish('update', settings, this);
     }
 
     _defineProperty = (prop) => {
@@ -63,11 +66,7 @@ class Model extends Module {
                 }
             },
             set: function(val) {
-                if(this.onSet) {
-                    this.onSet(prop, val);
-                } else {
-                    this.set(prop, val);
-                }
+                this.set(prop, val);
             }
         });
     }

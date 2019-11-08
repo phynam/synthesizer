@@ -1,16 +1,16 @@
-class Module
+class Module extends EventBus
 {
     busHandlers = {};
 
     constructor()
     {
-        this.bus = new EventBus();
+        super();
     }
 
     _bindBusHandlers()
     {
         Object.keys(this.busHandlers).forEach(eventName => {
-            this.bus.subscribe(eventName, this.busHandlers[eventName].bind(this));
+            this.subscribe(eventName, this.busHandlers[eventName].bind(this));
         });
     }
 }
