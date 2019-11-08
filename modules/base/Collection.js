@@ -55,6 +55,7 @@ class Collection extends Module
     }
 
     clear = () => {
+        this.publish('clear', this.items);
         this.items = [];
         return this;
     }

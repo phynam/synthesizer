@@ -2,6 +2,8 @@ class PianoRollNotes extends View
 {
     dragThresholdPx = 8;
     rowHeightPx = 15;
+    noteClass = 'piano-roll__note';
+    selectedClass = 'is-selected';
 
     lastCursorPositionY;
     lastCursorPositionX;
@@ -22,6 +24,10 @@ class PianoRollNotes extends View
             this.renderNotes();
         });
 
+        sequencer.store.notes.subscribe('push', (note) => {
+            this.renderNotes();
+        });
+
         sequencer.store.selection.subscribe('item:update', (updates, note) => {
             if(updates.note >= 0) {
                 this._renderNoteInRow(note.el, updates.note);
@@ -36,8 +42,16 @@ class PianoRollNotes extends View
             }
         });
 
-        sequencer.store.notes.subscribe('push', (note) => {
-            this.renderNotes();
+        sequencer.store.selection.subscribe('push', (note) => {
+            note.el.classList.add(this.selectedClass);
+        });
+
+        sequencer.store.selection.subscribe('clear', (notes) => {
+            if(notes.length) {
+                notes.forEach(note => {
+                    note.el.classList.remove(this.selectedClass);
+                });
+            }
         });
 
         /**
@@ -113,9 +127,8 @@ class PianoRollNotes extends View
         sequencer.store.selection.clear();
         sequencer.store.notes.push(new NoteModel({
             start: this._pxToBeats(e.pageX),
-            velocity: 127,
-            note: 127,
-            end: this._pxToBeats(e.pageX) + 1
+            note: this._noteAtYOffset(e.offsetY),
+            end: this._pxToBeats(e.pageX) + 1 // TODO: Use default
         }));
     }
 
@@ -195,5 +208,9 @@ class PianoRollNotes extends View
 
     _dragX(e) {
         return e.pageX - this.lastCursorPositionX;
+    }
+
+    _noteAtYOffset(offset) {
+        return sequencer.store.nNotes - 1 - Math.floor(offset / this.rowHeightPx);
     }
 }

@@ -3,7 +3,8 @@ class NoteModel extends Model {
     constructor(properties)
     {
         let defaults = {
-            id: Date.now() + ~~((Math.random() * 1000) + 1)
+            id: Date.now() + ~~((Math.random() * 1000) + 1),
+            velocity: 100
         };
 
         super(Object.assign({}, defaults, properties));
