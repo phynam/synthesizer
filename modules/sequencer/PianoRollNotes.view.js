@@ -129,6 +129,7 @@ class PianoRollNotes extends View
     }
 
     _onGridMousedown(e) {
+
         let handler = this._onSelectionDrag = this._onSelectionDrag.bind(this);
 
         this.lastCursorPositionX = e.pageX;
@@ -146,7 +147,7 @@ class PianoRollNotes extends View
 
         if(rangeX[0] !== rangeX[1]) {
             this.isSelectionDragging = true;
-
+            sequencer.store.selection.clear();
             selectedNotes.forEach(note => {
                 sequencer.store.selection.push(note.clone());
             });
@@ -155,12 +156,16 @@ class PianoRollNotes extends View
 
     _onGridMouseup(e) {
         if(!this.isSelectionDragging) {
+
+            if(sequencer.store.selection.size() === 0) {
+                sequencer.store.notes.push(new NoteModel({
+                    start: this._pxToBeats(e.pageX),
+                    note: this._noteAtYOffset(e.offsetY),
+                    end: this._pxToBeats(e.pageX) + 1 // TODO: Use default
+                }));
+            }
+            
             sequencer.store.selection.clear();
-            sequencer.store.notes.push(new NoteModel({
-                start: this._pxToBeats(e.pageX),
-                note: this._noteAtYOffset(e.offsetY),
-                end: this._pxToBeats(e.pageX) + 1 // TODO: Use default
-            }));
         }
     }
 
