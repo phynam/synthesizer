@@ -144,8 +144,6 @@ class PianoRollNotes extends View
             return (note.start >= rangeX[0] && note.start < rangeX[1]) || (note.end >= rangeX[0] && note.end < rangeX[1]);
         });
 
-        sequencer.store.selection.clear();
-
         if(rangeX[0] !== rangeX[1]) {
             this.isSelectionDragging = true;
 
@@ -157,6 +155,7 @@ class PianoRollNotes extends View
 
     _onGridMouseup(e) {
         if(!this.isSelectionDragging) {
+            sequencer.store.selection.clear();
             sequencer.store.notes.push(new NoteModel({
                 start: this._pxToBeats(e.pageX),
                 note: this._noteAtYOffset(e.offsetY),
