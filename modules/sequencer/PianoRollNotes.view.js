@@ -2,7 +2,6 @@ class PianoRollNotes extends View
 {
     dragThresholdPx = 8;
     rowHeightPx = 15;
-    noteClass = 'piano-roll__note';
     selectedClass = 'is-selected';
     isDragging = false;
 
@@ -68,7 +67,8 @@ class PianoRollNotes extends View
 
     interfaceHandlers = {
         '.piano-roll__note:mousedown': this._onNoteMousedown,
-        '.piano-roll__notes:mousedown': this._onGridMousedown
+        '.piano-roll__notes:mousedown': this._onGridMousedown,
+        '.piano-roll__notes:mouseup': this._onGridMouseup
     }
 
     /**
@@ -80,8 +80,6 @@ class PianoRollNotes extends View
 
         let note = sequencer.store.notes.find(+el.id).clone(),
             handler = this._onNoteMove = this._onNoteMove.bind(this);
-
-        note.el = el;
 
         sequencer.store.selection.clear().push(note);
 
@@ -130,7 +128,26 @@ class PianoRollNotes extends View
     }
 
     _onGridMousedown(e) {
+        let handler = this._onSelectionDrag = this._onSelectionDrag.bind(this);
+
+        this.lastCursorPositionX = e.pageX;
+        this.lastCursorPositionY = e.pageY;
+
+        document.addEventListener('mousemove', handler, false);
+    }
+
+    _onSelectionDrag(e) {
         sequencer.store.selection.clear();
+
+        let rangeX = [this._pxToBeats(e.pageX), this._pxToBeats(this.lastCursorPositionX)].sort();
+
+        sequencer.store.selection.set(sequencer.store.notes.where(note => {
+            return (note.start >= rangeX[0] && note.start < rangeX[1]) || (note.end >= rangeX[0] && note.end < rangeX[1]);
+        }));
+    }
+
+    _onGridMouseup(e) {
+        // TODO: Do this only if not dragging
         sequencer.store.notes.push(new NoteModel({
             start: this._pxToBeats(e.pageX),
             note: this._noteAtYOffset(e.offsetY),
@@ -150,6 +167,7 @@ class PianoRollNotes extends View
         document.removeEventListener('mousemove', this._onNoteResizeLeft, false);
         document.removeEventListener('mousemove', this._onNoteResizeRight, false);
         document.removeEventListener('mousemove', this._onNoteMove, false);
+        document.removeEventListener('mousemove', this._onSelectionDrag, false);
     }
 
     _onGlobalKeydown(e) {

@@ -9,6 +9,10 @@ class Collection extends Module
         this.set(items, true);
     }
 
+    where = (cb) => {
+        return this.items.filter(cb);
+    }
+
     all = () => {
         return this.items;
     }
