@@ -3,7 +3,8 @@ class PianoRollNotes extends View
     dragThresholdPx = 8;
     rowHeightPx = 15;
     selectedClass = 'is-selected';
-    isDragging = false;
+    isNoteDragging = false;
+    isSelectionDragging = false;
 
     lastCursorPositionY;
     lastCursorPositionX;
@@ -95,7 +96,7 @@ class PianoRollNotes extends View
         }
 
         document.addEventListener('mousemove', handler, false);
-        this.isDragging = true;
+        this.isNoteDragging = true;
     }
 
     _onNoteMove(e) {
@@ -134,34 +135,40 @@ class PianoRollNotes extends View
         this.lastCursorPositionY = e.pageY;
 
         document.addEventListener('mousemove', handler, false);
+        this.isSelectionDragging = true;
     }
 
     _onSelectionDrag(e) {
-        sequencer.store.selection.clear();
 
         let rangeX = [this._pxToBeats(e.pageX), this._pxToBeats(this.lastCursorPositionX)].sort();
-
-        sequencer.store.selection.set(sequencer.store.notes.where(note => {
+        let selectedNotes = sequencer.store.notes.where(note => {
             return (note.start >= rangeX[0] && note.start < rangeX[1]) || (note.end >= rangeX[0] && note.end < rangeX[1]);
-        }));
+        });
+
+        sequencer.store.selection.clear();
+
+        selectedNotes.forEach(note => {
+            sequencer.store.selection.push(note.clone());
+        });
     }
 
     _onGridMouseup(e) {
-        // TODO: Do this only if not dragging
-        sequencer.store.notes.push(new NoteModel({
-            start: this._pxToBeats(e.pageX),
-            note: this._noteAtYOffset(e.offsetY),
-            end: this._pxToBeats(e.pageX) + 1 // TODO: Use default
-        }));
+        if(!this.isSelectionDragging) {
+            sequencer.store.notes.push(new NoteModel({
+                start: this._pxToBeats(e.pageX),
+                note: this._noteAtYOffset(e.offsetY),
+                end: this._pxToBeats(e.pageX) + 1 // TODO: Use default
+            }));
+        }
     }
 
     _onGlobalMouseup(e) {
-        if(this.isDragging) {
+        if(this.isNoteDragging) {
             sequencer.store.selection.each(item => {
                 sequencer.store.notes.find(item.id).update(item.properties, true);
             });
 
-            this.isDragging = false;
+            this.isNoteDragging = false;
         }
 
         document.removeEventListener('mousemove', this._onNoteResizeLeft, false);
