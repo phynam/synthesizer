@@ -19,6 +19,19 @@ class Collection extends Module
         });
     }
 
+    remove = (id) => {
+
+        let index = this.items.findIndex(item => {
+            return item.id === id;
+        });
+
+        let x = this.items.splice(index, 1);
+
+        this.publish('remove', x[0]);
+
+        return this.items;
+    }
+
     push = (item) => {
         this._bindChildHandlers(item);
         this.items.push(item);

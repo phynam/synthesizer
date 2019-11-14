@@ -4,10 +4,10 @@ class PianoRollNotes extends View
     rowHeightPx = 15;
     noteClass = 'piano-roll__note';
     selectedClass = 'is-selected';
+    isDragging = false;
 
     lastCursorPositionY;
     lastCursorPositionX;
-    isDragging;
 
     constructor(selector)
     {
@@ -26,6 +26,10 @@ class PianoRollNotes extends View
 
         sequencer.store.notes.subscribe('push', (note) => {
             this.renderNotes();
+        });
+
+        sequencer.store.notes.subscribe('remove', (note) => {
+            this.renderNotes(true);
         });
 
         sequencer.store.selection.subscribe('item:update', (updates, note) => {
@@ -55,14 +59,16 @@ class PianoRollNotes extends View
         });
 
         /**
-         * Remove stray resize handlers.
+         * Global handlers
          */
         document.addEventListener('mouseup', this._onGlobalMouseup.bind(this));
+        document.addEventListener('keydown', this._onGlobalKeydown.bind(this));
+        
     }
 
     interfaceHandlers = {
         '.piano-roll__note:mousedown': this._onNoteMousedown,
-        '.piano-roll__notes:click': this._onGridClick
+        '.piano-roll__notes:mousedown': this._onGridMousedown
     }
 
     /**
@@ -123,7 +129,7 @@ class PianoRollNotes extends View
         });
     }
 
-    _onGridClick(e) {
+    _onGridMousedown(e) {
         sequencer.store.selection.clear();
         sequencer.store.notes.push(new NoteModel({
             start: this._pxToBeats(e.pageX),
@@ -146,6 +152,20 @@ class PianoRollNotes extends View
         document.removeEventListener('mousemove', this._onNoteMove, false);
     }
 
+    _onGlobalKeydown(e) {
+        let key = event.keyCode;
+
+        /**
+         * Delete
+         */
+        if(key === 8 || key === 46) {
+            sequencer.store.selection.each(item => {
+                sequencer.store.notes.remove(item.id);
+            });
+            sequencer.store.selection.clear();
+        }
+    }
+
     /**
      * Render functions
      */
@@ -153,10 +173,15 @@ class PianoRollNotes extends View
         this.el.style.height = `${(sequencer.store.nNotes) * this.rowHeightPx}px`;
     }
 
-    renderNotes() {
+    renderNotes(hard = false) {
+
+        if(hard) {
+            this.el.innerHTML = '';
+        }
+
         sequencer.store.notes.each(newNote => {
             let result = document.getElementById(newNote.id);
-            if(! result) {
+            if(! result || hard) {
                 result = this._createNoteElement(newNote);
                 this.el.appendChild(result);
             }

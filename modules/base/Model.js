@@ -50,7 +50,7 @@ class Model extends Module {
 
     update = (settings) => {
         Object.keys(settings).forEach(key => {
-            settings[key] = this.set(key, settings[key]);
+            this.set(key, settings[key]);
         });
 
         this.publish('update', settings, this);
