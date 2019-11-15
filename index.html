@@ -8,8 +8,11 @@
 </head>
 <body>
     <div class="piano-roll">
-        <div class="piano-roll__notes" data-piano-roll-notes>
+        <div class="piano-roll__grid">
+            <div id="drag-overlay" class="piano-roll__drag-overlay"></div>
+            <div class="piano-roll__notes" data-piano-roll-notes></div>
         </div>
+
     </div>
 
     <style>
@@ -26,6 +29,20 @@
         }
         .piano-roll__notes {
             overflow: hidden;
+            position: relative;
+            height: inherit;
+        }
+        .piano-roll__drag-overlay {
+            display: none;
+            position: absolute;
+            width: 100%;
+            height: inherit;
+            z-index: 20;
+        }
+        .piano-roll__drag-overlay.is-active {
+            display: block;
+        }
+        .piano-roll__grid {
             position: relative;
             background: url('octave.svg') 0 100%;
         }
