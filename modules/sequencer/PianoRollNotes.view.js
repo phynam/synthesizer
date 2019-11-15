@@ -83,7 +83,9 @@ class PianoRollNotes extends View
         let note = sequencer.store.notes.find(+el.id).clone(),
             handler = this._onNoteMove = this._onNoteMove.bind(this);
 
-        sequencer.store.selection.clear().push(note);
+        if(sequencer.store.selection.size() <= 1) {
+            sequencer.store.selection.clear().push(note);
+        }
 
         this.lastCursorPositionX = e.pageX;
         this.lastCursorPositionY = e.pageY;
