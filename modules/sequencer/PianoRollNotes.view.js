@@ -138,7 +138,6 @@ class PianoRollNotes extends View
         this.lastCursorOffsetY = e.offsetY;
 
         document.addEventListener('mousemove', handler, false);
-        this._showDragOverlay();
     }
 
     _onSelectionDrag(e) {
@@ -151,6 +150,7 @@ class PianoRollNotes extends View
         });
 
         if(rangeX[0] !== rangeX[1]) {
+            this._showDragOverlay();
             this.isSelectionDragging = true;
             sequencer.store.selection.clear();
             selectedNotes.forEach(note => {
@@ -185,9 +185,9 @@ class PianoRollNotes extends View
 
         if(this.isSelectionDragging) {
             this.isSelectionDragging = false;
-            this._hideDragOverlay();
         }
 
+        this._hideDragOverlay();
         document.removeEventListener('mousemove', this._onNoteResizeLeft, false);
         document.removeEventListener('mousemove', this._onNoteResizeRight, false);
         document.removeEventListener('mousemove', this._onNoteMove, false);
