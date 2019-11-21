@@ -34,16 +34,16 @@ class PianoRollNotes extends View
         });
 
         sequencer.store.selection.subscribe('item:update', (updates, note) => {
-            if(updates.note >= 0) {
+            if(updates.note) {
                 this._renderNoteInRow(note.el, updates.note);
             }
 
-            if(updates.start >= 0 || updates.end) {
+            if(!updates.start || !updates.end) {
                 this._renderWidth(note.el, this._beatsToPercent(note.end - note.start));
+            }
 
-                if(updates.start >= 0) {
-                    this._renderXPosition(note.el, this._beatsToPercent(updates.start));
-                }
+            if(updates.start) {
+                this._renderXPosition(note.el, this._beatsToPercent(updates.start));
             }
         });
 
@@ -98,8 +98,8 @@ class PianoRollNotes extends View
             handler = this._onNoteResizeRight = this._onNoteResizeRight.bind(this);
         }
 
-        document.addEventListener('mousemove', handler, false);
         this.isNoteDragging = true;
+        document.addEventListener('mousemove', handler, false);
     }
 
     _onNoteMove(e) {
