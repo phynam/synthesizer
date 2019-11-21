@@ -38,8 +38,8 @@ class PianoRollNotes extends View
                 this._renderNoteInRow(note.el, updates.note);
             }
 
-            if(!updates.start || !updates.end) {
-                this._renderWidth(note.el, this._beatsToPercent(note.end - note.start));
+            if(updates.duration) {
+                this._renderWidth(note.el, this._beatsToPercent(note.duration));
             }
 
             if(updates.start) {
@@ -109,7 +109,6 @@ class PianoRollNotes extends View
         sequencer.store.selection.each(note => {
             note.update({
                 start: noteOffsetBeats + note.last('start'),
-                end: note.last('end') - note.last('start') + note.start,
                 note: note.last('note') + noteOffset
             });
         });
@@ -118,7 +117,8 @@ class PianoRollNotes extends View
     _onNoteResizeLeft(e) {
         sequencer.store.selection.each(note => {
             note.update({
-                start: note.last('start') + this._pxToBeats(this._dragX(e))
+                start: note.last('start') + this._pxToBeats(this._dragX(e)),
+                duration: note.last('duration') + this._pxToBeats(this._dragX(e))
             });
         });
     }
@@ -126,7 +126,7 @@ class PianoRollNotes extends View
     _onNoteResizeRight(e) {
         sequencer.store.selection.each(note => {
             note.update({
-                end: note.last('end') + this._pxToBeats(this._dragX(e))
+                duration: note.last('duration') + this._pxToBeats(this._dragX(e))
             });
         });
     }
@@ -147,6 +147,7 @@ class PianoRollNotes extends View
         let rangeX = [this._pxToBeats(e.pageX), this._pxToBeats(this.lastCursorPositionX)].sort();
         let rangeY = [this._noteAtYOffsetPx(e.offsetY), this._noteAtYOffsetPx(this.lastCursorOffsetY)].sort();
 
+        // Todo: refactor to use Duration
         let selectedNotes = sequencer.store.notes.where(note => { 
             return ((note.start >= rangeX[0] && note.start < rangeX[1]) || (note.end >= rangeX[0] && note.end < rangeX[1])) && (note.note >= rangeY[0] && note.note <= rangeY[1]);
         });
@@ -163,12 +164,11 @@ class PianoRollNotes extends View
 
     _onGridMouseup(e) {
         if(!this.isSelectionDragging) {
-
             if(sequencer.store.selection.size() === 0) {
                 sequencer.store.notes.push(new NoteModel({
                     start: this._pxToBeats(e.pageX),
                     note: this._noteAtYOffsetPx(e.offsetY),
-                    end: this._pxToBeats(e.pageX) + 1 // TODO: Use default
+                    duration: 2 // TODO: Use default
                 }));
             }
             
@@ -232,7 +232,7 @@ class PianoRollNotes extends View
             }
             this._renderXPosition(result, this._beatsToPercent(newNote.start));
             this._renderNoteInRow(result, newNote.note);
-            this._renderWidth(result, this._beatsToPercent(newNote.end - newNote.start));
+            this._renderWidth(result, this._beatsToPercent(newNote.duration));
         });
     }
 

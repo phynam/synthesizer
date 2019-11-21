@@ -12,7 +12,7 @@
     n = n.map(n => {
         return new NoteModel({
             start: n[0],
-            end: n[1],
+            duration: n[1],
             note: n[2],
             velocity: n[3]
         });
