@@ -9,6 +9,7 @@ class PianoRollNotes extends View
     lastCursorPositionY;
     lastCursorPositionX;
     lastCursorOffsetY;
+    service;
 
     constructor(selector)
     {
@@ -17,23 +18,13 @@ class PianoRollNotes extends View
         this._bindInterfaceHandlers();
         this._bindBusHandlers();
 
+        this.service = new NoteService();
+
         sequencer.store.notes.subscribe('set', () => {
             this.renderNotes();
         });
 
-        sequencer.store.notes.subscribe('item:update', () => {
-            this.renderNotes();
-        });
-
-        sequencer.store.notes.subscribe('push', (note) => {
-            this.renderNotes();
-        });
-
-        sequencer.store.notes.subscribe('remove', (note) => {
-            this.renderNotes(true);
-        });
-
-        sequencer.store.selection.subscribe('item:update', (updates, note) => {
+        sequencer.store.notes.subscribe('item:update', (updates, note) => {
             if(updates.note) {
                 this._renderNoteInRow(note.el, updates.note);
             }
@@ -47,8 +38,18 @@ class PianoRollNotes extends View
             }
         });
 
-        sequencer.store.selection.subscribe('push', (note) => {
-            note.el.classList.add(this.selectedClass);
+        sequencer.store.notes.subscribe('push', (note) => {
+            this.renderNotes();
+        });
+
+        sequencer.store.notes.subscribe('remove', (note) => {
+            this.renderNotes(true);
+        });
+
+        sequencer.store.selection.subscribe('set', (ids) => {
+            ids.forEach(id => {
+                document.getElementById(id).classList.add(this.selectedClass);
+            });
         });
 
         sequencer.store.selection.subscribe('clear', (notes) => {
@@ -80,11 +81,10 @@ class PianoRollNotes extends View
 
         e.preventDefault();
 
-        let note = sequencer.store.notes.find(+el.id).clone(),
-            handler = this._onNoteMove = this._onNoteMove.bind(this);
+        let handler = this._onNoteMove = this._onNoteMove.bind(this);
 
-        if(sequencer.store.selection.size() <= 1) {
-            sequencer.store.selection.clear().push(note);
+        if(this.service.selection().size() <= 1) {
+            this.service.setSelection(+el.id);
         }
 
         this.lastCursorPositionX = e.pageX;
@@ -106,30 +106,30 @@ class PianoRollNotes extends View
         let noteOffset = -Math.floor((this._dragY(e) + this.rowHeightPx / 2) / this.rowHeightPx),
             noteOffsetBeats = this._pxToBeats(this._dragX(e));
 
-        sequencer.store.selection.each(note => {
-            note.update({
+        this.service.selection().each(note => {
+            this.service.update(note.id, {
                 start: noteOffsetBeats + note.last('start'),
                 note: note.last('note') + noteOffset
             });
         });
     }
 
-    _onNoteResizeLeft(e) {
-        sequencer.store.selection.each(note => {
-            note.update({
-                start: note.last('start') + this._pxToBeats(this._dragX(e)),
-                duration: note.last('duration') + this._pxToBeats(this._dragX(e))
-            });
-        });
-    }
+    // _onNoteResizeLeft(e) {
+    //     sequencer.store.selection.each(note => {
+    //         note.update({
+    //             start: note.last('start') + this._pxToBeats(this._dragX(e)),
+    //             duration: note.last('duration') + this._pxToBeats(this._dragX(e))
+    //         });
+    //     });
+    // }
 
-    _onNoteResizeRight(e) {
-        sequencer.store.selection.each(note => {
-            note.update({
-                duration: note.last('duration') + this._pxToBeats(this._dragX(e))
-            });
-        });
-    }
+    // _onNoteResizeRight(e) {
+    //     sequencer.store.selection.each(note => {
+    //         note.update({
+    //             duration: note.last('duration') + this._pxToBeats(this._dragX(e))
+    //         });
+    //     });
+    // }
 
     _onGridMousedown(e) {
 
@@ -149,7 +149,7 @@ class PianoRollNotes extends View
 
         // Todo: refactor to use Duration
         let selectedNotes = sequencer.store.notes.where(note => { 
-            return ((note.start >= rangeX[0] && note.start < rangeX[1]) || (note.end >= rangeX[0] && note.end < rangeX[1])) && (note.note >= rangeY[0] && note.note <= rangeY[1]);
+            return ((note.start >= rangeX[0] && note.start < rangeX[1]) || (note.start + note.duration >= rangeX[0] && note.start + note.duration < rangeX[1])) && (note.note >= rangeY[0] && note.note <= rangeY[1]);
         });
 
         if(rangeX[0] !== rangeX[1]) {

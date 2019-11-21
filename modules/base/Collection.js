@@ -46,6 +46,10 @@ class Collection extends Module
     size = () => {
         return this.items.length;
     }
+    
+    first = () => {
+        return this.items[0];
+    }
 
     set = (items, quiet = false) => {
         if(!items) {
