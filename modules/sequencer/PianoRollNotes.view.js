@@ -38,11 +38,11 @@ class PianoRollNotes extends View
             }
         });
 
-        sequencer.store.notes.subscribe('push', (note) => {
+        sequencer.store.notes.subscribe('push', () => {
             this.renderNotes();
         });
 
-        sequencer.store.notes.subscribe('remove', (note) => {
+        sequencer.store.notes.subscribe('remove', () => {
             this.renderNotes(true);
         });
 
@@ -52,12 +52,10 @@ class PianoRollNotes extends View
             });
         });
 
-        sequencer.store.selection.subscribe('clear', (notes) => {
-            if(notes.length) {
-                notes.forEach(note => {
-                    note.el.classList.remove(this.selectedClass);
-                });
-            }
+        sequencer.store.selection.subscribe('clear', (ids) => {
+            ids.forEach(id => {
+                document.getElementById(id).classList.remove(this.selectedClass);;
+            });
         });
 
         /**
@@ -84,6 +82,7 @@ class PianoRollNotes extends View
         let handler = this._onNoteMove = this._onNoteMove.bind(this);
 
         if(this.service.selection().size() <= 1) {
+            this.service.clearSelection();
             this.service.setSelection(+el.id);
         }
 
@@ -114,22 +113,22 @@ class PianoRollNotes extends View
         });
     }
 
-    // _onNoteResizeLeft(e) {
-    //     sequencer.store.selection.each(note => {
-    //         note.update({
-    //             start: note.last('start') + this._pxToBeats(this._dragX(e)),
-    //             duration: note.last('duration') + this._pxToBeats(this._dragX(e))
-    //         });
-    //     });
-    // }
+    _onNoteResizeLeft(e) {
+        this.service.selection().each(note => {
+            this.service.update(note.id, {
+                start: note.last('start') + this._pxToBeats(this._dragX(e)),
+                duration: note.last('duration') + this._pxToBeats(this._dragX(e))
+            });
+        });
+    }
 
-    // _onNoteResizeRight(e) {
-    //     sequencer.store.selection.each(note => {
-    //         note.update({
-    //             duration: note.last('duration') + this._pxToBeats(this._dragX(e))
-    //         });
-    //     });
-    // }
+    _onNoteResizeRight(e) {
+        this.service.selection().each(note => {
+            this.service.update(note.id, {
+                duration: note.last('duration') + this._pxToBeats(this._dragX(e))
+            });
+        });
+    }
 
     _onGridMousedown(e) {
 
@@ -155,16 +154,17 @@ class PianoRollNotes extends View
         if(rangeX[0] !== rangeX[1]) {
             this._showDragOverlay();
             this.isSelectionDragging = true;
-            sequencer.store.selection.clear();
+            this.service.clearSelection();
+
             selectedNotes.forEach(note => {
-                sequencer.store.selection.push(note.clone());
+                this.service.addToSelection(note.id);
             });
         }        
     }
 
     _onGridMouseup(e) {
         if(!this.isSelectionDragging) {
-            if(sequencer.store.selection.size() === 0) {
+            if(this.service.selection().size() === 0) {
                 sequencer.store.notes.push(new NoteModel({
                     start: this._pxToBeats(e.pageX),
                     note: this._noteAtYOffsetPx(e.offsetY),
@@ -172,14 +172,14 @@ class PianoRollNotes extends View
                 }));
             }
             
-            sequencer.store.selection.clear();
+            this.service.clearSelection();
         }
     }
 
     _onGlobalMouseup(e) {
         if(this.isNoteDragging) {
-            sequencer.store.selection.each(item => {
-                sequencer.store.notes.find(item.id).update(item.properties, true);
+            this.service.selection().each(item => {
+                item.cache();
             });
 
             this.isNoteDragging = false;
@@ -203,10 +203,10 @@ class PianoRollNotes extends View
          * Delete
          */
         if(key === 8 || key === 46) {
-            sequencer.store.selection.each(item => {
+            this.service.selection().each(item => {
                 sequencer.store.notes.remove(item.id);
             });
-            sequencer.store.selection.clear();
+            this.service.selection().clear();
         }
     }
 

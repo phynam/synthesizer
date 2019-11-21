@@ -19,6 +19,16 @@ class NoteService extends Module {
         return this.selection();
     }
 
+    clearSelection() {
+        this.store.selection.clear();
+    }
+
+    addToSelection(id) {
+        this.store.selection.push(id);
+
+        return this.selection();
+    }
+
     selection() {
         let selection = this.store.selection.all();
 
