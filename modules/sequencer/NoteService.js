@@ -38,6 +38,29 @@ class NoteService extends Module {
     }
 
     update(id, updates) {
+
+        if(!this._validateUpdates(updates)) {
+            return;
+        }
+
         this.store.notes.find(id).update(updates);
+    }
+
+    create(values) {
+        this.store.notes.push(new NoteModel(values));
+    }
+
+    // TODO: Move to validation class
+    _validateUpdates(updates) {
+
+        if(typeof updates.note != 'undefined' && (updates.note < 0 || updates.note >= this.store.nNotes)) {
+            return false;
+        }
+
+        if(typeof updates.start != 'undefined' && updates.start < 0) {
+            return false;
+        }
+
+        return true;
     }
 }

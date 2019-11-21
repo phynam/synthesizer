@@ -20,12 +20,8 @@ class PianoRollNotes extends View
 
         this.service = new NoteService();
 
-        sequencer.store.notes.subscribe('set', () => {
-            this.renderNotes();
-        });
-
         sequencer.store.notes.subscribe('item:update', (updates, note) => {
-            if(updates.note) {
+            if(typeof updates.note != 'undefined') {
                 this._renderNoteInRow(note.el, updates.note);
             }
 
@@ -42,7 +38,7 @@ class PianoRollNotes extends View
             this.renderNotes();
         });
 
-        sequencer.store.notes.subscribe('remove', () => {
+        sequencer.store.notes.subscribe('set remove', () => {
             this.renderNotes(true);
         });
 
@@ -146,6 +142,7 @@ class PianoRollNotes extends View
         let rangeX = [this._pxToBeats(e.pageX), this._pxToBeats(this.lastCursorPositionX)].sort();
         let rangeY = [this._noteAtYOffsetPx(e.offsetY), this._noteAtYOffsetPx(this.lastCursorOffsetY)].sort();
 
+        // TODO: This sucks
         let selectedNotes = sequencer.store.notes.where(note => { 
             return ((note.start >= rangeX[0] && note.start < rangeX[1]) || (note.start + note.duration >= rangeX[0] && note.start + note.duration < rangeX[1])) && (note.note >= rangeY[0] && note.note <= rangeY[1]);
         }).map(n => { return n.id });
@@ -161,12 +158,11 @@ class PianoRollNotes extends View
     _onGridMouseup(e) {
         if(!this.isSelectionDragging) {
             if(this.service.selection().size() === 0) {
-                // TODO: Move to service
-                sequencer.store.notes.push(new NoteModel({
+                this.service.create({
                     start: this._pxToBeats(e.pageX),
                     note: this._noteAtYOffsetPx(e.offsetY),
                     duration: 2 // TODO: Use default
-                }));
+                });
             }
             
             this.service.clearSelection();

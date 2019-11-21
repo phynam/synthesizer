@@ -23,10 +23,12 @@ class EventBus
      */
     subscribe(eventName, callback)
     {
-        if(! this.events[eventName]) {
-            this.events[eventName] = [];
-        }
+        eventName.split(' ').forEach(e => {
+            if(!this.events[e]) {
+                this.events[e] = [];
+            }
 
-        this.events[eventName].push(callback);
+            this.events[e].push(callback);
+        });
     }
 }
