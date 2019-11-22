@@ -75,6 +75,10 @@ class Collection extends Module
         }
     }
 
+    map = (cb) => {
+        return this.items.map(cb);
+    }
+
     clear = () => {
         this.publish('clear', this.items);
         this.items = [];

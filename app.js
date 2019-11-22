@@ -3,7 +3,7 @@
     // View takes an object of methods and properties
     window.sequencer.view = new PianoRollNotes('[data-piano-roll-notes]');
     window.sequencer.view.renderGrid();
-    window.sequencer.view.renderNotes();
+    window.sequencer.view.render();
 
     var n = [
         [2,2.25,127,127], [4,4.5,126,127], [3,3.75,125,127], [2,4,123,127]

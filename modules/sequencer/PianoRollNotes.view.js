@@ -29,11 +29,11 @@ class PianoRollNotes extends View
         });
 
         store.notes.subscribe('push', () => {
-            this.renderNotes();
+            this.render();
         });
 
         store.notes.subscribe('set remove', () => {
-            this.renderNotes(true);
+            this.render(true);
         });
 
         store.selection.subscribe('set', () => {
@@ -93,12 +93,20 @@ class PianoRollNotes extends View
             let noteOffset = -Math.floor((y + self.rowHeightPx / 2) / self.rowHeightPx),
                 noteOffsetBeats = self._pxToBeats(x);
 
-            service.selection().each(note => {
-                service.update(note.id, {
+            service.bulkUpdate(service.selection().map(note => {
+                return {
+                    id: note.id,
                     start: noteOffsetBeats + note.last('start'),
                     note: note.last('note') + noteOffset
-                });
-            });
+                }
+            }));
+
+            // service.selection().each(note => {
+            //     service.update(note.id, {
+            //         start: noteOffsetBeats + note.last('start'),
+            //         note: note.last('note') + noteOffset
+            //     });
+            // });
         }, function() {
             service.selection().each(item => {
                 item.cache();
@@ -219,7 +227,7 @@ class PianoRollNotes extends View
         _('.piano-roll__grid').first().style.height = `${(store.nNotes) * this.rowHeightPx}px`;
     }
 
-    renderNotes(hard = false) {
+    render(hard = false) {
 
         if(hard) {
             this.el.innerHTML = '';
