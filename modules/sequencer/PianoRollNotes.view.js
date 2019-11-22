@@ -21,15 +21,15 @@ class PianoRollNotes extends View
         this.service = new NoteService();
 
         sequencer.store.notes.subscribe('item:update', (updates, note) => {
-            if(typeof updates.note != 'undefined') {
+            if(typeof updates.note !== 'undefined') {
                 this._renderNoteInRow(note.el, updates.note);
             }
 
-            if(updates.duration) {
+            if(typeof updates.duration !== 'undefined') {
                 this._renderWidth(note.el, this._beatsToPercent(note.duration));
             }
 
-            if(typeof updates.start != 'undefined') {
+            if(typeof updates.start !== 'undefined') {
                 this._renderXPosition(note.el, this._beatsToPercent(updates.start));
             }
         });
@@ -42,15 +42,15 @@ class PianoRollNotes extends View
             this.renderNotes(true);
         });
 
-        sequencer.store.selection.subscribe('set', (ids) => {
-            ids.forEach(id => {
-                document.getElementById(id).classList.add(this.selectedClass);
+        sequencer.store.selection.subscribe('set', () => {
+            this.service.selection().each(note => {
+                note.el.classList.add(this.selectedClass);
             });
         });
 
-        sequencer.store.selection.subscribe('clear', (ids) => {
-            ids.forEach(id => {
-                document.getElementById(id).classList.remove(this.selectedClass);;
+        sequencer.store.selection.subscribe('clear', () => {
+            this.service.selection().each(note => {
+                note.el.classList.remove(this.selectedClass);
             });
         });
 
@@ -113,7 +113,7 @@ class PianoRollNotes extends View
         this.service.selection().each(note => {
             this.service.update(note.id, {
                 start: note.last('start') + this._pxToBeats(this._dragX(e)),
-                duration: note.last('duration') + this._pxToBeats(this._dragX(e))
+                duration: note.last('duration') - this._pxToBeats(this._dragX(e))
             });
         });
     }

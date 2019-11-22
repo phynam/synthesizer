@@ -39,8 +39,6 @@ class NoteService extends Module {
 
     update(id, updates) {
 
-        console.log(updates);
-
         updates = this._validateUpdates(updates);
 
         this.store.notes.find(id).update(updates);
@@ -62,11 +60,9 @@ class NoteService extends Module {
         }
 
         if(typeof updates.start != 'undefined' && updates.start < 0) {
-            console.log(updates.start);
             updates.start = 0;
         }
         
         return updates;
-
     }
 }
