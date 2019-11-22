@@ -1,3 +1,6 @@
+let service = new NoteService();
+let store = sequencer.store;
+
 class PianoRollNotes extends View
 {
     dragThresholdPx = 8;
@@ -9,7 +12,6 @@ class PianoRollNotes extends View
     lastCursorPositionY;
     lastCursorPositionX;
     lastCursorOffsetY;
-    service;
 
     constructor(selector)
     {
@@ -18,9 +20,7 @@ class PianoRollNotes extends View
         this._bindInterfaceHandlers();
         this._bindBusHandlers();
 
-        this.service = new NoteService();
-
-        sequencer.store.notes.subscribe('item:update', (updates, note) => {
+        store.notes.subscribe('item:update', (updates, note) => {
             if(typeof updates.note !== 'undefined') {
                 this._renderNoteInRow(note.el, updates.note);
             }
@@ -34,22 +34,22 @@ class PianoRollNotes extends View
             }
         });
 
-        sequencer.store.notes.subscribe('push', () => {
+        store.notes.subscribe('push', () => {
             this.renderNotes();
         });
 
-        sequencer.store.notes.subscribe('set remove', () => {
+        store.notes.subscribe('set remove', () => {
             this.renderNotes(true);
         });
 
-        sequencer.store.selection.subscribe('set', () => {
-            this.service.selection().each(note => {
+        store.selection.subscribe('set', () => {
+            service.selection().each(note => {
                 note.el.classList.add(this.selectedClass);
             });
         });
 
-        sequencer.store.selection.subscribe('clear', () => {
-            this.service.selection().each(note => {
+        store.selection.subscribe('clear', () => {
+            service.selection().each(note => {
                 note.el.classList.remove(this.selectedClass);
             });
         });
@@ -77,9 +77,9 @@ class PianoRollNotes extends View
 
         let handler = this._onNoteMove = this._onNoteMove.bind(this);
 
-        if(this.service.selection().size() <= 1) {
-            this.service.clearSelection();
-            this.service.setSelection(+el.id);
+        if(service.selection().size() <= 1) {
+            service.clearSelection();
+            service.setSelection(+el.id);
         }
 
         this.lastCursorPositionX = e.pageX;
@@ -101,8 +101,8 @@ class PianoRollNotes extends View
         let noteOffset = -Math.floor((this._dragY(e) + this.rowHeightPx / 2) / this.rowHeightPx),
             noteOffsetBeats = this._pxToBeats(this._dragX(e));
 
-        this.service.selection().each(note => {
-            this.service.update(note.id, {
+        service.selection().each(note => {
+            service.update(note.id, {
                 start: noteOffsetBeats + note.last('start'),
                 note: note.last('note') + noteOffset
             });
@@ -110,8 +110,8 @@ class PianoRollNotes extends View
     }
 
     _onNoteResizeLeft(e) {
-        this.service.selection().each(note => {
-            this.service.update(note.id, {
+        service.selection().each(note => {
+            service.update(note.id, {
                 start: note.last('start') + this._pxToBeats(this._dragX(e)),
                 duration: note.last('duration') - this._pxToBeats(this._dragX(e))
             });
@@ -119,8 +119,8 @@ class PianoRollNotes extends View
     }
 
     _onNoteResizeRight(e) {
-        this.service.selection().each(note => {
-            this.service.update(note.id, {
+        service.selection().each(note => {
+            service.update(note.id, {
                 duration: note.last('duration') + this._pxToBeats(this._dragX(e))
             });
         });
@@ -139,39 +139,56 @@ class PianoRollNotes extends View
 
     _onSelectionDrag(e) {
 
-        let rangeX = [this._pxToBeats(e.pageX), this._pxToBeats(this.lastCursorPositionX)].sort();
-        let rangeY = [this._noteAtYOffsetPx(e.offsetY), this._noteAtYOffsetPx(this.lastCursorOffsetY)].sort();
+        let rangeX = [
+            this._pxToBeats(e.pageX), 
+            this._pxToBeats(this.lastCursorPositionX)
+        ].sort((a,b) => { return a - b });
 
-        // TODO: This sucks
-        let selectedNotes = sequencer.store.notes.where(note => { 
-            return ((note.start >= rangeX[0] && note.start < rangeX[1]) || (note.start + note.duration >= rangeX[0] && note.start + note.duration < rangeX[1])) && (note.note >= rangeY[0] && note.note <= rangeY[1]);
+        let rangeY = [
+            this._noteAtYOffsetPx(e.offsetY), 
+            this._noteAtYOffsetPx(this.lastCursorOffsetY)
+        ].sort((a,b) => { return a - b });
+
+        let selectedNotes = store.notes.where(note => { 
+
+            if(note.note >= rangeY[0] && note.note <= rangeY[1]) {
+
+                let end = note.start + note.duration;
+
+                if(note.start >= rangeX[0] && note.start < rangeX[1]) {
+                    return true;
+                }
+
+                if(end >= rangeX[0] && end < rangeX[1]) {
+                    return true;
+                }
+            }
         }).map(n => { return n.id });
 
-        if(rangeX[0] !== rangeX[1]) {
-            this._showDragOverlay();
-            this.isSelectionDragging = true;
-            this.service.clearSelection();
-            this.service.setSelection(selectedNotes);
-        }        
+        this._showDragOverlay();
+        this.isSelectionDragging = true;
+        service.clearSelection();
+        service.setSelection(selectedNotes);
+    
     }
 
     _onGridMouseup(e) {
         if(!this.isSelectionDragging) {
-            if(this.service.selection().size() === 0) {
-                this.service.create({
+            if(service.selection().size() === 0) {
+                service.create({
                     start: this._pxToBeats(e.pageX),
                     note: this._noteAtYOffsetPx(e.offsetY),
-                    duration: 2 // TODO: Use default
+                    duration: store.division
                 });
             }
             
-            this.service.clearSelection();
+            service.clearSelection();
         }
     }
 
     _onGlobalMouseup(e) {
         if(this.isNoteDragging) {
-            this.service.selection().each(item => {
+            service.selection().each(item => {
                 item.cache();
             });
 
@@ -196,10 +213,10 @@ class PianoRollNotes extends View
          * Delete
          */
         if(key === 8 || key === 46) {
-            this.service.selection().each(item => {
-                sequencer.store.notes.remove(item.id);
+            service.selection().each(item => {
+                store.notes.remove(item.id);
             });
-            this.service.selection().clear();
+            service.selection().clear();
         }
     }
 
@@ -208,7 +225,7 @@ class PianoRollNotes extends View
      */
     // TODO: Move to grid view
     renderGrid() {
-        _('.piano-roll__grid').first().style.height = `${(sequencer.store.nNotes) * this.rowHeightPx}px`;
+        _('.piano-roll__grid').first().style.height = `${(store.nNotes) * this.rowHeightPx}px`;
     }
 
     renderNotes(hard = false) {
@@ -217,7 +234,7 @@ class PianoRollNotes extends View
             this.el.innerHTML = '';
         }
 
-        sequencer.store.notes.each(newNote => {
+        store.notes.each(newNote => {
             let result = document.getElementById(newNote.id);
             if(! result || hard) {
                 result = this._createNoteElement(newNote);
@@ -230,7 +247,7 @@ class PianoRollNotes extends View
     }
 
     _renderNoteInRow(el, note) {
-        this._renderYPosition(el, (sequencer.store.nNotes - note) * this.rowHeightPx);
+        this._renderYPosition(el, (store.nNotes - note) * this.rowHeightPx);
     }
 
     _renderXPosition(el, position) {
@@ -249,11 +266,11 @@ class PianoRollNotes extends View
      * Helper functions
      */
     _pxToBeats(px) {
-        return px / this.el.offsetWidth * sequencer.store.nBeatsInSequence;
+        return px / this.el.offsetWidth * store.nBeatsInSequence;
     }
 
     _beatsToPercent(beats) {
-        return beats / sequencer.store.nBeatsInSequence * 100;
+        return beats / store.nBeatsInSequence * 100;
     }
 
     _createNoteElement(note) {
@@ -274,7 +291,7 @@ class PianoRollNotes extends View
     }
 
     _noteAtYOffsetPx(offset) {
-        return sequencer.store.nNotes - Math.floor(offset / this.rowHeightPx);
+        return store.nNotes - Math.floor(offset / this.rowHeightPx);
     }
 
     _showDragOverlay() {

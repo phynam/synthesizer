@@ -1,7 +1,8 @@
 window.sequencer = window.sequencer || {};
 window.sequencer.store = new Model({
     nBeatsInSequence: 16,
-    nNotes: 128
+    nNotes: 128,
+    division: 0.25
 });
 
 window.sequencer.store.set('notes', new Collection());
