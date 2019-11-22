@@ -29,7 +29,7 @@ class PianoRollNotes extends View
                 this._renderWidth(note.el, this._beatsToPercent(note.duration));
             }
 
-            if(updates.start) {
+            if(typeof updates.start != 'undefined') {
                 this._renderXPosition(note.el, this._beatsToPercent(updates.start));
             }
         });
@@ -230,7 +230,7 @@ class PianoRollNotes extends View
     }
 
     _renderNoteInRow(el, note) {
-        this._renderYPosition(el, (sequencer.store.nNotes - note - 1) * this.rowHeightPx);
+        this._renderYPosition(el, (sequencer.store.nNotes - note) * this.rowHeightPx);
     }
 
     _renderXPosition(el, position) {
@@ -274,7 +274,7 @@ class PianoRollNotes extends View
     }
 
     _noteAtYOffsetPx(offset) {
-        return sequencer.store.nNotes - 1 - Math.floor(offset / this.rowHeightPx);
+        return sequencer.store.nNotes - Math.floor(offset / this.rowHeightPx);
     }
 
     _showDragOverlay() {

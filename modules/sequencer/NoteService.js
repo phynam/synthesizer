@@ -39,9 +39,9 @@ class NoteService extends Module {
 
     update(id, updates) {
 
-        if(!this._validateUpdates(updates)) {
-            return;
-        }
+        console.log(updates);
+
+        updates = this._validateUpdates(updates);
 
         this.store.notes.find(id).update(updates);
     }
@@ -53,14 +53,20 @@ class NoteService extends Module {
     // TODO: Move to validation class
     _validateUpdates(updates) {
 
-        if(typeof updates.note != 'undefined' && (updates.note < 0 || updates.note >= this.store.nNotes)) {
-            return false;
+        if(typeof updates.note != 'undefined' && updates.note < 1) {
+            updates.note = 1;
+        }
+
+        if(typeof updates.note != 'undefined' && updates.note > this.store.nNotes) {
+            updates.note = this.store.nNotes;
         }
 
         if(typeof updates.start != 'undefined' && updates.start < 0) {
-            return false;
+            console.log(updates.start);
+            updates.start = 0;
         }
+        
+        return updates;
 
-        return true;
     }
 }
