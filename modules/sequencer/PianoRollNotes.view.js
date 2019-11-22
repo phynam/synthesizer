@@ -128,6 +128,8 @@ class PianoRollNotes extends View
 
     _onGridMousedown(e) {
 
+        e.preventDefault();
+
         let handler = this._onSelectionDrag = this._onSelectionDrag.bind(this);
 
         this.lastCursorPositionX = e.pageX;
@@ -139,37 +141,35 @@ class PianoRollNotes extends View
 
     _onSelectionDrag(e) {
 
-        let rangeX = [
-            this._pxToBeats(e.pageX), 
-            this._pxToBeats(this.lastCursorPositionX)
-        ].sort((a,b) => { return a - b });
+        this._showDragOverlay();
 
-        let rangeY = [
-            this._noteAtYOffsetPx(e.offsetY), 
-            this._noteAtYOffsetPx(this.lastCursorOffsetY)
-        ].sort((a,b) => { return a - b });
-
-        let selectedNotes = store.notes.where(note => { 
-
-            if(note.note >= rangeY[0] && note.note <= rangeY[1]) {
-
+        if(e.target.id == 'drag-overlay') {
+            let rangeX = [
+                this._pxToBeats(e.pageX), 
+                this._pxToBeats(this.lastCursorPositionX)
+            ].sort((a,b) => { return a - b });
+    
+            let rangeY = [
+                this._noteAtYOffsetPx(e.offsetY), 
+                this._noteAtYOffsetPx(this.lastCursorOffsetY)
+            ].sort((a,b) => { return a - b });
+    
+            let selectedNotes = store.notes.where(note => {
                 let end = note.start + note.duration;
 
-                if(note.start >= rangeX[0] && note.start < rangeX[1]) {
-                    return true;
+                if(note.note >= rangeY[0] && note.note <= rangeY[1]) {
+                    if(rangeX[0] >= note.start || rangeX[1] >= note.start) {
+                        if(rangeX[0] < end || rangeX[1] < end) {
+                            return true;
+                        }
+                    }
                 }
-
-                if(end >= rangeX[0] && end < rangeX[1]) {
-                    return true;
-                }
-            }
-        }).map(n => { return n.id });
-
-        this._showDragOverlay();
-        this.isSelectionDragging = true;
-        service.clearSelection();
-        service.setSelection(selectedNotes);
+            }).map(n => { return n.id });
     
+            this.isSelectionDragging = true;
+            service.clearSelection();
+            service.setSelection(selectedNotes);
+        }
     }
 
     _onGridMouseup(e) {
