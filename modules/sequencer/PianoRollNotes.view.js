@@ -5,7 +5,7 @@ class PianoRollNotes extends View
 {
     dragThresholdPx = 8;
     rowHeightPx = 15;
-    selectedClass = 'is-selected';
+    activeClass = 'is-active';
 
     constructor(selector)
     {
@@ -38,13 +38,13 @@ class PianoRollNotes extends View
 
         store.selection.subscribe('set', () => {
             service.selection().each(note => {
-                note.el.classList.add(this.selectedClass);
+                note.el.classList.add(this.activeClass);
             });
         });
 
         store.selection.subscribe('clear', () => {
             service.selection().each(note => {
-                note.el.classList.remove(this.selectedClass);
+                note.el.classList.remove(this.activeClass);
             });
         });
 
@@ -146,25 +146,27 @@ class PianoRollNotes extends View
         clickEvent.preventDefault();
 
         // if(service.selection().size() === 0) {
-            
         //     return service.create({
         //         start: this._pxToBeats(clickEvent.pageX),
         //         note: this._noteAtYOffsetPx(clickEvent.offsetY),
         //         duration: store.division
         //     });
         // }
+        
         service.clearSelection();
 
         let self = this;
 
         helpers.onDrag(function(e, x, y) {
 
+            self._renderDragMarker(clickEvent.offsetX, clickEvent.offsetY, x, y);
             self._showDragOverlay();
 
-            if(e.target.id == 'drag-overlay') {
+            if(e.target.id == 'drag-screen') {
+
                 let rangeX = [
                     self._pxToBeats(e.pageX), 
-                    self._pxToBeats(clickEvent.pageX)
+                    self._pxToBeats(clickEvent.offsetX)
                 ].sort((a,b) => { return a - b });
         
                 let rangeY = [
@@ -183,8 +185,6 @@ class PianoRollNotes extends View
                         }
                     }
                 }).map(n => { return n.id });
-
-                console.log(self._noteAtYOffsetPx(clickEvent.pageY));
         
                 service.clearSelection();
                 service.setSelection(selectedNotes);
@@ -251,6 +251,15 @@ class PianoRollNotes extends View
 
     _renderWidth(el, width) {
         el.style.width = `${width}%` || el.style.width;
+    }
+
+    _renderDragMarker(x, y, width, height) {
+        let el = document.getElementById('drag-marker');
+
+        el.style.height = `${Math.abs(height)}px`;
+        el.style.width = `${Math.abs(width)}px`;
+        el.style.left = `${(width < 0) ? x + width : x}px`;
+        el.style.top = `${(height < 0) ? y + height : y}px`;
     }
 
     /**

@@ -7,7 +7,7 @@ class Helpers {
             let x, y;
 
             if(clickEvent) {
-                x = helpers.dragX(e, clickEvent), y = helpers.dragY(e, clickEvent);
+                x = helpers.dragDistanceX(e, clickEvent), y = helpers.dragDistanceY(e, clickEvent);
             }
 
             handler(e, x, y);
@@ -27,11 +27,11 @@ class Helpers {
         document.addEventListener('mouseup', mhandle, false);
     }
 
-    dragY(e, from) {
+    dragDistanceY(e, from) {
         return e.pageY - from.pageY;
     }
 
-    dragX(e, from) {
+    dragDistanceX(e, from) {
         return e.pageX - from.pageX;
     }
 }

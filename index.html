@@ -9,7 +9,10 @@
 <body>
     <div class="piano-roll">
         <div class="piano-roll__grid">
-            <div id="drag-overlay" class="piano-roll__drag-overlay"></div>
+            <div id="drag-overlay" class="piano-roll__drag-overlay">
+                <div id="drag-marker" class="piano-roll__drag-marker"></div>
+                <div id="drag-screen" class="piano-roll__drag-screen"></div>
+            </div>
             <div class="piano-roll__notes" data-piano-roll-notes></div>
         </div>
 
@@ -39,6 +42,19 @@
             height: inherit;
             z-index: 20;
         }
+        .piano-roll__drag-screen {
+            position: absolute;
+            width: 100%;
+            height: inherit;
+            z-index: 20;
+        }
+        .piano-roll__drag-marker {
+            background: #eee;
+            opacity: 0.4;
+            position: absolute;
+            z-index: 5;
+            border: 1px solid #333;
+        }
         .piano-roll__drag-overlay.is-active {
             display: block;
         }
@@ -54,7 +70,7 @@
             cursor: move;
         }
 
-        .piano-roll__note.is-selected {
+        .piano-roll__note.is-active {
             background: green;
             z-index: 1;
         }

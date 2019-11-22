@@ -38,9 +38,7 @@ class NoteService extends Module {
     }
 
     update(id, updates) {
-
         updates = this._validateUpdates(updates);
-
         this.store.notes.find(id).update(updates);
     }
 
