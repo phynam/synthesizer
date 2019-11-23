@@ -2,6 +2,8 @@ class Helpers {
 
     onDrag(handler, mouseup, clickEvent) {
 
+        let dragged = false;
+
         let handle = e => {
 
             let x, y;
@@ -10,13 +12,17 @@ class Helpers {
                 x = helpers.dragDistanceX(e, clickEvent), y = helpers.dragDistanceY(e, clickEvent);
             }
 
+            if(!dragged && Math.abs(x + y) > 2) {
+                dragged = true;
+            }
+
             handler(e, x, y);
         };
 
         let mhandle = e => {
 
             if(mouseup) {
-                mouseup(e);
+                mouseup(e, dragged);
                 document.removeEventListener('mouseup', mhandle, false);
             }
 

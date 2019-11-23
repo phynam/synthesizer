@@ -105,6 +105,7 @@ class NoteService extends Module {
     }
 
     create(values) {
+        values.duration = this.store.division;
         this.store.notes.push(new NoteModel(values));
     }
 

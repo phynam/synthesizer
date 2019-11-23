@@ -100,13 +100,6 @@ class PianoRollNotes extends View
                     note: note.last('note') + noteOffset
                 }
             }));
-
-            // service.selection().each(note => {
-            //     service.update(note.id, {
-            //         start: noteOffsetBeats + note.last('start'),
-            //         note: note.last('note') + noteOffset
-            //     });
-            // });
         }, function() {
             service.selection().each(item => {
                 item.cache();
@@ -152,14 +145,6 @@ class PianoRollNotes extends View
     _onGridMousedown(clickEvent) {
 
         clickEvent.preventDefault();
-
-        // if(service.selection().size() === 0) {
-        //     return service.create({
-        //         start: this._pxToBeats(clickEvent.pageX),
-        //         note: this._noteAtYOffsetPx(clickEvent.offsetY),
-        //         duration: store.division
-        //     });
-        // }
         
         service.clearSelection();
 
@@ -198,7 +183,14 @@ class PianoRollNotes extends View
                 service.setSelection(selectedNotes);
             }
 
-        }, function() {
+        }, function(e, dragged) {
+
+            if(!dragged) {
+                service.create({
+                    start: self._pxToBeats(e.pageX),
+                    note: self._noteAtYOffsetPx(e.offsetY),
+                });
+            }
 
             self._hideDragOverlay();
 
