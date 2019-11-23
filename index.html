@@ -19,6 +19,9 @@
     </div>
 
     <style>
+        *, *:before, *:after {
+            box-sizing: border-box;
+        }
         body {
             margin: 0;
         }
@@ -60,18 +63,23 @@
         }
         .piano-roll__grid {
             position: relative;
-            background: url('octave.svg') 0 100%;
+            background: url('octave.svg') 0 100% #34393F;
         }
         .piano-roll__note {
             position: absolute;
             height: 15px;
-            background: slategrey;
+            background: #B52540;
             margin: 0 auto;
             cursor: move;
+            border: 1px solid rgba(0, 0, 0, 0.7);
         }
 
         .piano-roll__note.is-active {
-            background: green;
+            background: black;
+            border: 3px solid #B52540;
+        }
+
+        .piano-roll__note.is-active {
             z-index: 1;
         }
 
@@ -81,16 +89,16 @@
             width: 8px;
             height: inherit;
             position: absolute;
-            top: 0;
+            top: -3px;
             cursor: col-resize;
         }
 
         .piano-roll__note:after {
-            right: 0;
+            right: -3px;
         }
 
         .piano-roll__note:before {
-            left: 0;
+            left: -3px;
         }
     </style>
 

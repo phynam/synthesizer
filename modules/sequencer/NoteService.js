@@ -2,6 +2,10 @@ class NoteService extends Module {
 
     store;
     validator;
+    boundsExceeded = {
+        start: false,
+        note: false
+    }
 
     constructor() {
 
@@ -40,7 +44,6 @@ class NoteService extends Module {
 
     addToSelection(id) {
         this.store.selection.push(id);
-
         return this.selection();
     }
 
@@ -74,42 +77,67 @@ class NoteService extends Module {
             }
         }
 
-        /**
-         * Keep full selection within range TODO: Rewrite
-         */
+        // If has errors
+            // If bounds are crossed and not flagged
+            //// Loop over updates, and set each to the bound
+            //// Set flag to crossed
+            // If bounds are crossed and flag is set
+            //// Delete flagged props from update
+        // If no errors
+            // Reset all flags
+
         if(validation.hasErrors()) {
-            updates.forEach(u => {
-                if(u.start) {
-                    let error = validation.getError('start', 'min');
 
-                    if(error) {
-                        u.start = u.start + Math.abs(error.actual);
-                    }
-                }
+            let errors = validation.getErrors();
 
-                if(u.note) {
+            Object.keys(errors).forEach(key => {
 
-                    let error = validation.getError('note', 'min');
+                if(! this.boundsExceeded[key]) {
+                    updates.forEach(u => {
+                        if(u.start) {
 
-                    if(error) {
-                        u.note = u.note + Math.abs(error.actual);
-                    }
+                            let error = validation.getError('start', 'min');
 
-                    error = validation.getError('note', 'max');
+                            if(error) {
+                                u.start = u.start + Math.abs(error.actual);
+                            }
+                        }
 
-                    if(error) {
-                        u.note = u.note  - (error.actual - error.expected);
-                    }
-                }
+                        if(u.note) {
 
-                if(u.duration) {
-                    let error = validation.getError('duration', 'min');
+                            // let error = validation.getError('note', 'min');
 
-                    if(error) {
-                        u.duration = u.duration - (error.actual - error.expected);
-                    }
+                            // if(error) {
+                            //     u.note = u.note + Math.abs(error.actual);
+                            // }
+
+                            let error = validation.getError('note', 'max');
+
+                            if(error) {
+                                u.note = u.note - (error.actual - error.expected);
+                            }
+                        }
+
+                        if(u.duration) {
+
+                            let error = validation.getError('duration', 'min');
+
+                            if(error) {
+                                u.duration = u.duration - (error.actual - error.expected);
+                            }
+                        }
+                    });
+
+                    this.boundsExceeded[key] = true;
+                } else {
+                    updates.forEach(u => {
+                        delete u[key];
+                    });
                 }
             });
+        } else {
+            this.boundsExceeded['note'] = false;
+            this.boundsExceeded['start'] = false;
         }
 
         updates.forEach(u => {

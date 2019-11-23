@@ -15,16 +15,16 @@ class PianoRollNotes extends View
         this._bindBusHandlers();
 
         store.notes.subscribe('item:update', (updates, note) => {
-            if(typeof updates.note !== 'undefined') {
-                this._renderNoteInRow(note.el, updates.note);
+            if(typeof note.note !== 'undefined') {
+                this._renderNoteInRow(note.el, note.note);
             }
 
-            if(typeof updates.duration !== 'undefined') {
+            if(typeof note.duration !== 'undefined') {
                 this._renderWidth(note.el, this._beatsToPercent(note.duration));
             }
 
-            if(typeof updates.start !== 'undefined') {
-                this._renderXPosition(note.el, this._beatsToPercent(updates.start));
+            if(typeof note.start !== 'undefined') {
+                this._renderXPosition(note.el, this._beatsToPercent(note.start));
             }
         });
 
@@ -94,11 +94,14 @@ class PianoRollNotes extends View
                 noteOffsetBeats = self._pxToBeats(x);
 
             service.bulkUpdate(service.selection().map(note => {
-                return {
+
+                let u = {
                     id: note.id,
                     start: noteOffsetBeats + note.last('start'),
                     note: note.last('note') + noteOffset
                 }
+
+                return u;
             }));
         }, function() {
             service.selection().each(item => {
@@ -189,6 +192,7 @@ class PianoRollNotes extends View
 
             if(!dragged) {
 
+                // TODO: Should only happen on pen mode
                 if(!service.hasSelection()) {
                     service.create({
                         start: self._pxToBeats(e.pageX),
