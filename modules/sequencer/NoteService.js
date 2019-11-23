@@ -11,11 +11,14 @@ class NoteService extends Module {
         this.validator = new Validator({
             note: {
                 min: 1,
-                max: this.store.nNotes
+                max: this.store.nNotes,
             },
             start: {
                 min: 0,
                 max: this.store.nBeatsInSequence
+            },
+            duration: {
+                min: this.store.division
             }
         });
         
@@ -39,6 +42,10 @@ class NoteService extends Module {
         this.store.selection.push(id);
 
         return this.selection();
+    }
+
+    hasSelection() {
+        this.store.selection.all().length > 0;
     }
 
     selection() {
@@ -92,6 +99,14 @@ class NoteService extends Module {
 
                     if(error) {
                         u.note = u.note  - (error.actual - error.expected);
+                    }
+                }
+
+                if(u.duration) {
+                    let error = validation.getError('duration', 'min');
+
+                    if(error) {
+                        u.duration = u.duration - (error.actual - error.expected);
                     }
                 }
             });

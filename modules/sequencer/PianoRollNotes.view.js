@@ -112,12 +112,13 @@ class PianoRollNotes extends View
         let self = this;
 
         helpers.onDrag(function(e, x) {
-            service.selection().each(note => {
-                service.update(note.id, {
+            service.bulkUpdate(service.selection().map(note => {
+                return {
+                    id: note.id,
                     start: note.last('start') + self._pxToBeats(x),
                     duration: note.last('duration') - self._pxToBeats(x)
-                });
-            });
+                }
+            }));
         }, function() {
             service.selection().each(item => {
                 item.cache();
@@ -130,11 +131,12 @@ class PianoRollNotes extends View
         let self = this;
 
         helpers.onDrag(function(e, x) {
-            service.selection().each(note => {
-                service.update(note.id, {
+            service.bulkUpdate(service.selection().map(note => {
+                return {
+                    id: note.id,
                     duration: note.last('duration') + self._pxToBeats(x)
-                });
-            });
+                }
+            }));
         }, function() {
             service.selection().each(item => {
                 item.cache();
@@ -186,10 +188,13 @@ class PianoRollNotes extends View
         }, function(e, dragged) {
 
             if(!dragged) {
-                service.create({
-                    start: self._pxToBeats(e.pageX),
-                    note: self._noteAtYOffsetPx(e.offsetY),
-                });
+
+                if(!service.hasSelection()) {
+                    service.create({
+                        start: self._pxToBeats(e.pageX),
+                        note: self._noteAtYOffsetPx(e.offsetY),
+                    });
+                }
             }
 
             self._hideDragOverlay();
