@@ -60,9 +60,13 @@ class NoteService extends Module {
     }
 
     split(id, beat) {
-        let donor = this.store.notes.find(id), 
-            a = donor.toArray(), 
-            b = donor.toArray();
+        let donor = this.store.notes.find(id);
+
+        if(donor.start > beat || donor.duration + donor.start <= beat) {
+            return;
+        }
+
+        let a = donor.toArray(), b = donor.toArray();
 
         delete a.id;
         delete b.id;
