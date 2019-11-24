@@ -35,7 +35,7 @@ class NoteService extends Module {
 
         this.store.selection.set(ids);
 
-        return this.selection();
+        return this.store.selection.all();
     }
 
     clearSelection() {
@@ -44,19 +44,11 @@ class NoteService extends Module {
 
     addToSelection(id) {
         this.store.selection.push(id);
-        return this.selection();
+        return this.store.selection.all();
     }
 
     hasSelection() {
         this.store.selection.all().length > 0;
-    }
-
-    selection() {
-        let selection = this.store.selection.all();
-
-        return new Collection(this.store.notes.where(n => {
-            return selection.includes(n.id);
-        }))
     }
 
     split(id, beat) {

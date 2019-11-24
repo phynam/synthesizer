@@ -1,10 +1,10 @@
 class Collection extends Module
 {
-    items = [];
-
     constructor(items)
     {
         super();
+
+        this.items = items || [];
         
         this.set(items, true);
     }

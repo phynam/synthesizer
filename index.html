@@ -8,6 +8,9 @@
 </head>
 <body>
     <div class="piano-roll">
+        <!-- <div class="piano-roll__guide">
+
+        </div> -->
         <div class="piano-roll__grid">
             <div id="drag-overlay" class="piano-roll__drag-overlay">
                 <div id="drag-marker" class="piano-roll__drag-marker"></div>
@@ -24,6 +27,7 @@
         }
         body {
             margin: 0;
+            background:#eee;
         }
         .piano-roll {
             overflow-y: scroll;
@@ -64,6 +68,12 @@
         .piano-roll__grid {
             position: relative;
             background: url('octave.svg') 0 100% #34393F;
+        }
+        .piano-roll__guide {
+            width: 50px;
+            position: absolute;
+            height: 100%;
+            background: url('octave-dark.svg') 0 100% #fff;
         }
         .piano-roll__note {
             position: absolute;
@@ -110,6 +120,7 @@
     <script src="modules/base/Model.js"></script>
     <script src="modules/base/Validator.js"></script>
 
+    <script src="modules/sequencer/SelectionCollection.js"></script>
     <script src="modules/sequencer/NoteService.js"></script>
     <script src="modules/sequencer/NoteModel.js"></script>
     <script src="modules/sequencer/NoteCollection.js"></script>

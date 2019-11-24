@@ -1,0 +1,8 @@
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='6.25%' height='180' viewPort='0 0 1000 1000'>
+    <rect x='0' y='8.33333%' width='50%' height='8.33333%' fill='#333'></rect>
+    <line x="0" y="8.33333%" width='100%' style="stroke:#333;stroke-width:1" />
+    <rect x='0' y='25%' width='50%' height='8.33333%' fill='#333'></rect>
+    <rect x='0' y='41.66666%' width='50%' height='8.33333%' fill='#333'></rect>
+    <rect x='0' y='66.66666%' width='50%' height='8.33333%' fill='#333'></rect>
+    <rect x='0' y='83.33333%' width='50%' height='8.33333%' fill='#333'></rect>
+</svg>

@@ -6,4 +6,4 @@ window.sequencer.store = new Model({
 });
 
 window.sequencer.store.set('notes', new NoteCollection());
-window.sequencer.store.set('selection', new Collection());
+window.sequencer.store.set('selection', new SelectionCollection(sequencer.store));

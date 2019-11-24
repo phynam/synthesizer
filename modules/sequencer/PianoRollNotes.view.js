@@ -41,13 +41,13 @@ class PianoRollNotes extends View
         });
 
         store.selection.subscribe('set', () => {
-            service.selection().each(note => {
+            store.selection.all().each(note => {
                 note.el.classList.add(this.activeClass);
             });
         });
 
         store.selection.subscribe('clear', () => {
-            service.selection().each(note => {
+            store.selection.all().each(note => {
                 note.el.classList.remove(this.activeClass);
             });
         });
@@ -71,7 +71,7 @@ class PianoRollNotes extends View
 
         e.preventDefault();
 
-        if(service.selection().size() <= 1) {
+        if(store.selection.all().size() <= 1) {
             service.clearSelection();
             service.setSelection(+el.id);
         }
@@ -97,7 +97,7 @@ class PianoRollNotes extends View
             let noteOffset = -Math.floor((y + self.rowHeightPx / 2) / self.rowHeightPx),
                 noteOffsetBeats = self._pxToBeats(x);
 
-            service.bulkUpdate(service.selection().map(note => {                
+            service.bulkUpdate(store.selection.all().map(note => {                
 
                 let u = {
                     id: note.id,
@@ -108,10 +108,8 @@ class PianoRollNotes extends View
                 return u;
             }));
         }, function() {
-            service.selection().each(note => {
-
+            store.selection.all().each(note => {
                 note.cache();
-
                 service.updateOverlappingNotes(note);
             });
         }, clickEvent);
@@ -122,7 +120,7 @@ class PianoRollNotes extends View
         let self = this;
 
         helpers.onDrag(function(e, x) {
-            service.bulkUpdate(service.selection().map(note => {
+            service.bulkUpdate(store.selection.all().map(note => {
                 return {
                     id: note.id,
                     start: note.last('start') + self._pxToBeats(x),
@@ -130,8 +128,9 @@ class PianoRollNotes extends View
                 }
             }));
         }, function() {
-            service.selection().each(item => {
-                item.cache();
+            store.selection.all().each(note => {
+                note.cache();
+                service.updateOverlappingNotes(note);
             });
         }, clickEvent);
     }
@@ -141,15 +140,16 @@ class PianoRollNotes extends View
         let self = this;
 
         helpers.onDrag(function(e, x) {
-            service.bulkUpdate(service.selection().map(note => {
+            service.bulkUpdate(store.selection.all().map(note => {
                 return {
                     id: note.id,
                     duration: note.last('duration') + self._pxToBeats(x)
                 }
             }));
         }, function() {
-            service.selection().each(item => {
-                item.cache();
+            store.selection.all().each(note => {
+                note.cache();
+                service.updateOverlappingNotes(note);
             });
         }, clickEvent);
     }
@@ -193,10 +193,10 @@ class PianoRollNotes extends View
 
                 // TODO: Should only happen on pen mode
                 if(!service.hasSelection()) {
-                    // service.create({
-                    //     start: self._pxToBeats(e.pageX),
-                    //     note: self._noteAtYOffsetPx(e.offsetY),
-                    // });
+                    service.create({
+                        start: self._pxToBeats(e.pageX),
+                        note: self._noteAtYOffsetPx(e.offsetY),
+                    });
                 }
             }
 
@@ -212,10 +212,10 @@ class PianoRollNotes extends View
          * Delete
          */
         if(key === 8 || key === 46) {
-            service.selection().each(item => {
+            store.selection.all().each(item => {
                 store.notes.remove(item.id);
             });
-            service.selection().clear();
+            store.selection.all().clear();
         }
     }
 
