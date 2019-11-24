@@ -62,7 +62,7 @@ class NoteService extends Module {
     split(id, beat) {
         let donor = this.store.notes.find(id);
 
-        if(donor.start > beat || donor.duration + donor.start <= beat) {
+        if(!donor || (donor.start > beat || donor.duration + donor.start <= beat)) {
             return;
         }
 
@@ -79,16 +79,62 @@ class NoteService extends Module {
         b.start = a.start + a.duration
 
         this.store.notes.remove(donor.id);
-        
-        this.create(a);
-        this.create(b);
+
+        return [this.create(a), this.create(b)];
     }
 
     update(id, updates) {
         // TODO: Validate here, set range values
         //updates = this._validateUpdates(updates);
-        // Check if there are overlaps
         return this.store.notes.find(id).update(updates);
+    }
+
+    updateOverlappingNotes(note) {
+
+        let selectedNotes = this.store.notes.whereWithinRange(
+            note.start, note.end, note.note, note.note
+        );
+
+        // TODO: refactor to use recursion
+        selectedNotes.forEach(scratch => {
+            if(scratch.id === note.id) {
+                return;
+            }
+
+            // If start and end are both larger, split down the middle
+            if(scratch.start < note.start && scratch.end > note.end) {
+                scratch = this.split(scratch.id, note.start)[1];
+                this.update(scratch.id, {
+                    start: note.end,
+                    duration: scratch.end - note.end
+                }).cache();
+                return;
+            }
+
+            // If start and end are both covered, delete
+            if(scratch.start >= note.start && scratch.end <= note.end) {
+                this.store.notes.remove(scratch.id);
+                return;
+            }
+
+            // If only end is covered, resize left TODO:Refactor resize
+            if(scratch.start >= note.start && scratch.end >= note.end) {
+                this.update(scratch.id, {
+                    start: note.end,
+                    duration: scratch.end - note.end
+                }).cache();
+                return;
+            }
+
+            // If end is covered, resize right
+            if(scratch.start <= note.start || scratch.end <= note.start) {
+                this.update(scratch.id, {
+                    duration: note.start - scratch.start
+                }).cache();
+                return;
+            }
+
+        });
     }
 
     // Refactor to resize, move, resizeright? TODO
@@ -175,8 +221,12 @@ class NoteService extends Module {
     }
 
     create(values) {
+
         values.duration = values.duration || this.store.division;
-        this.store.notes.push(new NoteModel(values));
+        let note = new NoteModel(values)
+        this.store.notes.push(note);
+        
+        return note;
     }
 
     // TODO: Move to validation class

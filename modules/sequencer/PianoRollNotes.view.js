@@ -109,31 +109,10 @@ class PianoRollNotes extends View
             }));
         }, function() {
             service.selection().each(note => {
+
                 note.cache();
 
-                // TODO: Move to service, find sensible way to return this as collection not IDs
-                let selectedNotes = store.notes.whereWithinRange(
-                    note.start, note.end, note.note, note.note
-                );
-
-                selectedNotes.forEach(n => {
-                    if(n.id === note.id) {
-                        return;
-                    }
-
-                    // If start and end are both covered, delete
-                    if(n.start >= note.start && n.end <= note.end) {
-                        store.notes.remove(n.id);
-                        return;
-                    }
-
-                    // If start is covered, resize left
-                    
-
-                    // If end is covered, resize right
-
-
-                });
+                service.updateOverlappingNotes(note);
             });
         }, clickEvent);
     }
