@@ -76,7 +76,7 @@
 
         .piano-roll__note.is-active {
             background: black;
-            border: 3px solid #B52540;
+            box-shadow: inset 0 0 0 3px #B52540;
         }
 
         .piano-roll__note.is-active {
@@ -89,16 +89,16 @@
             width: 8px;
             height: inherit;
             position: absolute;
-            top: -3px;
+            top: 0;
             cursor: col-resize;
         }
 
         .piano-roll__note:after {
-            right: -3px;
+            right: 0;
         }
 
         .piano-roll__note:before {
-            left: -3px;
+            left: 0;
         }
     </style>
 

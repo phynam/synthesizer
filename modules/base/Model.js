@@ -54,6 +54,8 @@ class Model extends Module {
         });
 
         this.publish('update', settings, this);
+        
+        return this;
     }
 
     _defineProperty = (prop) => {

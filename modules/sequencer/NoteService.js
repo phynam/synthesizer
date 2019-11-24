@@ -59,10 +59,19 @@ class NoteService extends Module {
         }))
     }
 
+    split(id, beat) {
+
+    }
+
+    delete(id) {
+        
+    }
+
     update(id, updates) {
         // TODO: Validate here, set range values
         //updates = this._validateUpdates(updates);
-        this.store.notes.find(id).update(updates);
+        // Check if there are overlaps
+        return this.store.notes.find(id).update(updates);
     }
 
     bulkUpdate(updates) {
