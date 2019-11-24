@@ -29,7 +29,7 @@ class PianoRollNotes extends View
         });
 
         store.notes.subscribe('push', () => {
-            this.render(true);
+            this.render();
         });
 
         store.notes.subscribe('set', () => {
