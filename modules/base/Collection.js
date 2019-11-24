@@ -23,24 +23,17 @@ class Collection extends Module
         });
     }
 
-    delete = (id) => {
-        this.items.find(x => {
-            console.log(x);
-            return x.id === id;
-        });
-    }
-
     remove = (id) => {
 
         let index = this.items.findIndex(item => {
             return item.id === id;
         });
 
-        let x = this.items.splice(index, 1);
+        let x = this.items.splice(index, 1)[0];
 
-        this.publish('remove', x[0]);
+        this.publish('remove', x);
 
-        return this.items;
+        return x;
     }
 
     push = (item) => {

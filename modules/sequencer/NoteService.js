@@ -60,11 +60,24 @@ class NoteService extends Module {
     }
 
     split(id, beat) {
+        let donor = this.store.notes.find(id), 
+            a = donor.toArray(), 
+            b = donor.toArray();
 
-    }
+        delete a.id;
+        delete b.id;
 
-    delete(id) {
+        // Calculate split point
+        let aDuration = beat - a.start;
+
+        a.duration = aDuration;
+        b.duration = b.duration - a.duration;
+        b.start = a.start + a.duration
+
+        this.store.notes.remove(donor.id);
         
+        this.create(a);
+        this.create(b);
     }
 
     update(id, updates) {
@@ -74,6 +87,7 @@ class NoteService extends Module {
         return this.store.notes.find(id).update(updates);
     }
 
+    // Refactor to resize, move, resizeright? TODO
     bulkUpdate(updates) {
 
         let validation
@@ -157,7 +171,7 @@ class NoteService extends Module {
     }
 
     create(values) {
-        values.duration = this.store.division;
+        values.duration = values.duration || this.store.division;
         this.store.notes.push(new NoteModel(values));
     }
 

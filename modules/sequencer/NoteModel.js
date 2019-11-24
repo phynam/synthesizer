@@ -3,7 +3,7 @@ class NoteModel extends Model {
     constructor(properties)
     {        
         let defaults = {
-            id: Date.now() + ~~((Math.random() * 1000) + 1),
+            id: Date.now() + ~~((Math.random() * 1000) + 1), // TODO: Move to service?
             velocity: 100
         };
 
