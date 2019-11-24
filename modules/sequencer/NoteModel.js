@@ -9,10 +9,16 @@ class NoteModel extends Model {
 
         super(Object.assign({}, defaults, properties));
 
-        // TODO: Write as getter lower down?
+        // TODO: Write as getters lower down?
         Object.defineProperty(this, 'el', {
             get: x => {
                 return document.getElementById(this.id);
+            }
+        });
+
+        Object.defineProperty(this, 'end', {
+            get: x => {
+                return this.properties.start + this.properties.duration;
             }
         });
     }

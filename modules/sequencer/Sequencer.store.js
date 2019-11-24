@@ -5,5 +5,5 @@ window.sequencer.store = new Model({
     division: 0.25
 });
 
-window.sequencer.store.set('notes', new Collection());
+window.sequencer.store.set('notes', new NoteCollection());
 window.sequencer.store.set('selection', new Collection());

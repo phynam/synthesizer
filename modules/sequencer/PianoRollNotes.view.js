@@ -32,8 +32,12 @@ class PianoRollNotes extends View
             this.render(true);
         });
 
-        store.notes.subscribe('set remove', () => {
+        store.notes.subscribe('set', () => {
             this.render(true);
+        });
+
+        store.notes.subscribe('remove', (note) => {
+            note.el.remove();
         });
 
         store.selection.subscribe('set', () => {
@@ -93,7 +97,7 @@ class PianoRollNotes extends View
             let noteOffset = -Math.floor((y + self.rowHeightPx / 2) / self.rowHeightPx),
                 noteOffsetBeats = self._pxToBeats(x);
 
-            service.bulkUpdate(service.selection().map(note => {
+            service.bulkUpdate(service.selection().map(note => {                
 
                 let u = {
                     id: note.id,
@@ -104,8 +108,32 @@ class PianoRollNotes extends View
                 return u;
             }));
         }, function() {
-            service.selection().each(item => {
-                item.cache();
+            service.selection().each(note => {
+                note.cache();
+
+                // TODO: Move to service, find sensible way to return this as collection not IDs
+                let selectedNotes = store.notes.whereWithinRange(
+                    note.start, note.end, note.note, note.note
+                );
+
+                selectedNotes.forEach(n => {
+                    if(n.id === note.id) {
+                        return;
+                    }
+
+                    // If start and end are both covered, delete
+                    if(n.start >= note.start && n.end <= note.end) {
+                        store.notes.remove(n.id);
+                        return;
+                    }
+
+                    // If start is covered, resize left
+                    
+
+                    // If end is covered, resize right
+
+
+                });
             });
         }, clickEvent);
     }
@@ -172,17 +200,9 @@ class PianoRollNotes extends View
                     self._noteAtYOffsetPx(clickEvent.offsetY)
                 ].sort((a,b) => { return a - b });
         
-                let selectedNotes = store.notes.where(note => {
-                    let end = note.start + note.duration;
-
-                    if(note.note >= rangeY[0] && note.note <= rangeY[1]) {
-                        if(rangeX[0] >= note.start || rangeX[1] >= note.start) {
-                            if(rangeX[0] < end || rangeX[1] < end) {
-                                return true;
-                            }
-                        }
-                    }
-                }).map(n => { return n.id });
+                let selectedNotes = store.notes.whereWithinRange(
+                    rangeX[0], rangeX[1], rangeY[0], rangeY[1]
+                ).map(n => { return n.id });
         
                 service.clearSelection();
                 service.setSelection(selectedNotes);
@@ -194,10 +214,10 @@ class PianoRollNotes extends View
 
                 // TODO: Should only happen on pen mode
                 if(!service.hasSelection()) {
-                    service.create({
-                        start: self._pxToBeats(e.pageX),
-                        note: self._noteAtYOffsetPx(e.offsetY),
-                    });
+                    // service.create({
+                    //     start: self._pxToBeats(e.pageX),
+                    //     note: self._noteAtYOffsetPx(e.offsetY),
+                    // });
                 }
             }
 
