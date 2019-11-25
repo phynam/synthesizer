@@ -17,3 +17,5 @@ class Module extends EventBus
         });
     }
 }
+
+export {Module};

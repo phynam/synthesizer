@@ -1,0 +1,29 @@
+{
+  "name": "synthbench",
+  "version": "1.0.0",
+  "description": "Synth bench",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "webpack --watch --mode development",
+    "build": "webpack --watch --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://phynam@github.com/phynam/synthesizer.git"
+  },
+  "author": "Pieter Hynam",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/phynam/synthesizer/issues"
+  },
+  "homepage": "https://github.com/phynam/synthesizer#readme",
+  "devDependencies": {
+    "@babel/core": "^7.7.4",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/preset-env": "^7.7.4",
+    "babel-loader": "^8.0.6",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
+  },
+  "dependencies": {}
+}
