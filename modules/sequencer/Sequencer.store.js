@@ -1,5 +1,7 @@
 window.sequencer = window.sequencer || {};
-window.sequencer.store = new Model({
+window.sequencer.store = new Model();
+
+window.sequencer.store.update({
     nBeatsInSequence: 16,
     nNotes: 128,
     division: 0.25

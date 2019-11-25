@@ -10,8 +10,6 @@ class Model extends Module {
 
         if(properties) {
             properties = Object.assign({}, this.defaults, properties);
-            this.update(properties);
-            this.cache();
         }
     }
 
@@ -41,17 +39,29 @@ class Model extends Module {
             this._defineProperty(key);
         }
 
-        this.properties[key] = (this.onSet) ? this.onSet(key, val) : val;
+        if(this._onSet) {
+            val = this._onSet(key, val);
+
+            if(!val) {
+                return false;
+            }
+        }
+
+        this.properties[key] = val;
         
         this.publish('set', key, this.properties[key], this);
 
         return this.properties[key];
     }
 
-    update = (settings) => {
+    update = (settings, cache) => {
         Object.keys(settings).forEach(key => {
             this.set(key, settings[key]);
         });
+
+        if(cache) {
+            this.cache();
+        }
 
         this.publish('update', settings, this);
         
@@ -61,11 +71,7 @@ class Model extends Module {
     _defineProperty = (prop) => {
         Object.defineProperty(this, prop, {
             get: function() {
-                if(this.onGet) {
-                    this.onGet(prop, this.properties[prop]);
-                } else {
-                    return this.properties[prop];
-                }
+                return this.properties[prop];
             },
             set: function(val) {
                 this.set(prop, val);

@@ -1,4 +1,4 @@
-let service = new NoteService();
+let service = noteService;
 let store = sequencer.store;
 
 class PianoRollNotes extends View
@@ -94,18 +94,12 @@ class PianoRollNotes extends View
         let self = this;
 
         helpers.onDrag(function(e, x, y) {
-            let noteOffset = -Math.floor((y + self.rowHeightPx / 2) / self.rowHeightPx),
-                noteOffsetBeats = self._pxToBeats(x);
-
-            service.bulkUpdate(store.selection.all().map(note => {                
-
-                let u = {
-                    id: note.id,
-                    start: noteOffsetBeats + note.last('start'),
-                    note: note.last('note') + noteOffset
+            service.moveMultiple(store.selection.all().map(note => {  
+                return {
+                    note: note,
+                    beatOffset: self._pxToBeats(x),
+                    noteOffset: -Math.floor((y + self.rowHeightPx / 2) / self.rowHeightPx)
                 }
-
-                return u;
             }));
         }, function() {
             store.selection.all().each(note => {

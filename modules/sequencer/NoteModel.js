@@ -1,4 +1,4 @@
-class NoteModel extends Model {
+class NoteModel extends ValidatingModel {
 
     constructor(properties)
     {        
@@ -7,7 +7,20 @@ class NoteModel extends Model {
             velocity: 100
         };
 
-        super(Object.assign({}, defaults, properties));
+        let validations = {
+            note: {
+                min: 1, // TODO: Use 0 - 127?
+                max: 128
+            },
+            start: {
+                min: 0
+            },
+            duration: {
+                min: 0.25
+            }
+        }
+
+        super(Object.assign({}, defaults, properties), validations);
 
         // TODO: Write as getters lower down?
         Object.defineProperty(this, 'el', {

@@ -1,7 +1,6 @@
 class NoteService extends Module {
 
     store;
-    validator;
     boundsExceeded = {
         start: false,
         note: false
@@ -12,20 +11,6 @@ class NoteService extends Module {
         super();
 
         this.store = sequencer.store;
-        this.validator = new Validator({
-            note: {
-                min: 1,
-                max: this.store.nNotes,
-            },
-            start: {
-                min: 0,
-                max: this.store.nBeatsInSequence
-            },
-            duration: {
-                min: this.store.division
-            }
-        });
-        
     }
 
     setSelection(ids) {
@@ -125,31 +110,48 @@ class NoteService extends Module {
                 }).cache();
                 return;
             }
-
         });
     }
 
+    offsetNoteBy(id, noteOffset) {
+
+    }
+
+    offsetBeatBy(id, beatOffset) {
+
+    }
+
+    moveMultiple(updates) {
+        
+    }
+
+    resizeLeftMultiple(updates) {
+    }
+
+    resizeRightMultiple(updates) {
+    }
+
+    // /**
+    //  * Determine if at least one update has a validation error.
+    //  * 
+    //  * @param {array} updates 
+    //  */
+    // _validateMultiple(updates) {
+    //     let validation;
+
+    //     for(let i = 0; i < updates.length; i++) {
+    //         validation = this.validator.validate(updates[i]);
+
+    //         if(validation.hasErrors()) {
+    //             break;
+    //         }
+    //     }
+
+    //     return validation;
+    // }
+
     // Refactor to resize, move, resizeright? TODO
     bulkUpdate(updates) {
-
-        let validation
-
-        for(let i = 0; i < updates.length; i++) {
-            validation = this.validator.validate(updates[i]);
-
-            if(validation.hasErrors()) {
-                break;
-            }
-        }
-
-        // If has errors
-            // If bounds are crossed and not flagged
-            //// Loop over updates, and set each to the bound
-            //// Set flag to crossed
-            // If bounds are crossed and flag is set
-            //// Delete flagged props from update
-        // If no errors
-            // Reset all flags
 
         if(validation.hasErrors()) {
 
@@ -215,7 +217,10 @@ class NoteService extends Module {
     create(values) {
 
         values.duration = values.duration || this.store.division;
-        let note = new NoteModel(values)
+        let note = new NoteModel();
+
+        note.update(values, true);
+
         this.store.notes.push(note);
         
         return note;
@@ -239,3 +244,5 @@ class NoteService extends Module {
         return updates;
     }
 }
+
+var noteService = new NoteService();
