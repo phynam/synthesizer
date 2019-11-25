@@ -1,4 +1,6 @@
-class Module extends EventBus
+import { EventBus } from 'base/EventBus'
+
+class Component extends EventBus
 {
     busHandlers = {};
 
@@ -18,4 +20,4 @@ class Module extends EventBus
     }
 }
 
-export {Module};
+export {Component};

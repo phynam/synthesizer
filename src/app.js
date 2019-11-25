@@ -1,3 +1,10 @@
-import {Module} from './base/Module';
+import {Component} from 'base/Component';
+import {pianoRoll} from 'pianoRoll/piano-roll';
 
-const app = new Module();
+var app = new Component({
+    components: {
+        pianoRoll
+    }
+});
+
+export {app}
