@@ -23,7 +23,6 @@ module.exports = {
             stores: path.resolve(__dirname, 'src/stores/'),
             models: path.resolve(__dirname, 'src/models/'),
             collections: path.resolve(__dirname, 'src/collections/'),
-            pianoRoll: path.resolve(__dirname, 'src/components/piano-roll'),
             app: path.resolve(__dirname, 'src/')
         }
     }

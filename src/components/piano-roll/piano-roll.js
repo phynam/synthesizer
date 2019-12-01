@@ -7,6 +7,4 @@ const pianoRoll = new Component({
 
 });
 
-console.log(selection);
-
-export {pianoRoll};
+export {pianoRoll}
