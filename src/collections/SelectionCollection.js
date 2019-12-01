@@ -1,3 +1,5 @@
+import {Collection} from 'base/Collection';
+
 class SelectionCollection extends Collection
 {
     selected = [];
@@ -12,3 +14,5 @@ class SelectionCollection extends Collection
         this.selected = items;
     }
 }
+
+export {SelectionCollection};

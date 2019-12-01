@@ -1,6 +1,6 @@
-import {Module} from 'base/Module';
+import {Component} from 'base/Component';
 
-class Model extends Module {
+class Model extends Component {
 
     properties = {};
     oldProperties = {};
