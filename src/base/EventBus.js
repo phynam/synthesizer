@@ -33,4 +33,4 @@ class EventBus
     }
 }
 
-export {EventBus}
+export {EventBus};

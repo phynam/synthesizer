@@ -1,10 +1,10 @@
 import {Component} from 'base/Component';
-import {app} from '../../app';
+import {store} from 'stores/sequencer';
 
 const pianoRoll = new Component({
 
 });
 
-console.log(app);
+console.log(store);
 
 export {pianoRoll};
